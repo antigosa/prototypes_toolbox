@@ -1,0 +1,227 @@
+function Trials = prototypes_synthetic_simpleDS(ndotsOrMat, figure_size, sd, nsubj, simulateBias, seed)
+% function Trials = prototypes_synthetic_simpleDS(ndotsOrMat, figure_size, sd, nsubj, simulateBias, seed)
+%
+% This function provides a very basic simulation of the responses. You can
+% just decide if responses will be biased (simulateBias=1) or not (just
+% random responses around the actual data). If you want to simulate more
+% realistic responses, use prototypes_models.
+%
+% =========================================================================
+% INPUT
+% =========================================================================
+% ndotsOrMat: 
+% - scalar; it randomly creates ndotsOrMat dots
+% - 2D matrix (ndots x 2); if you want to provide the actual dots 
+% - 3D matrix (ndots x 2 x 2); if you want to provide the responses as well
+%
+% figure_size: 
+% - vector (1 x 2); the figure (container) dimensions
+% -- figure_size(1) is the width size (in pixel)
+% -- figure_size(2) is the height size (in pixel)
+%
+% sd: 
+% - scalar (%); the standard deviation used for create the responses (when 
+%               requested)
+%               
+% nsubj:
+% - scalar; number of participants
+%
+% simulateBias:
+% - scalar; either 1 (simulate the bias) or 0 (do not simulate the bias)
+%
+% seed:
+% - the seed used by the Matlab function 'rng'
+%
+% 20200831 - RT
+rng('default')
+if nargin==3;nsubj=1;simulateBias = 1;rng('shuffle');end
+if nargin==4;simulateBias = 1;rng('shuffle');end
+if nargin==5; rng('shuffle'); elseif nargin==6; rng(seed); end
+
+% sd is given as percentage, and needs to be converted in pixels. There is
+% one sd for each dimension
+sd1 = figure_size(1)*sd; 
+sd2 = figure_size(2)*sd;
+
+% prepare output
+Trials=table;
+
+% start the loop over subjects
+for s=1:nsubj
+    
+    % create synthetic DS for a subject
+    subjTable   = prototypes_synthetic_simpleDS_aSubj(ndotsOrMat, figure_size, sd1, sd2, s, simulateBias);        
+    
+    % append this to the main dataset (that contains all subjects)
+    Trials      = [Trials; subjTable];
+    
+    % IMPORTANT: the actual dots MUST be the same for all participants, so
+    % just use the one from participant one.
+    if s==1; ndotsOrMat=Trials.ActualDots_xy;end
+end
+
+% add fields that define a prototable
+Trials = prototypes_prototable(Trials);
+Trials = prototypes_set_metadata(Trials, 'Experiment', 'Synthetic data');
+Trials = prototypes_set_metadata(Trials, 'StimulusType', 'Square data');
+Trials = prototypes_set_metadata(Trials, 'ShapeRect', [0 0 figure_size]);
+Trials = prototypes_set_metadata(Trials, 'ShapeContainerRect', [0-figure_size(1)*.1 0-figure_size(2)*.1 figure_size(1)+figure_size(1)*.1 figure_size(2)+figure_size(2)*.1]);
+
+
+
+
+function Trials = prototypes_synthetic_simpleDS_aSubj(ndotsOrMat, figure_size, sd1, sd2, subjNum, simulateBias)
+
+% =========================================================================
+% initial setup
+% =========================================================================
+
+% get figure width
+figure_width    = figure_size(1);
+
+% get figure height
+figure_height   = figure_size(2);
+
+% the position of the bias is at 25% of each dimension
+bias_pos_x = figure_width*0.25;
+bias_pos_y = figure_height*0.25;
+
+% combine the two dimensions
+bias_pos = [bias_pos_x bias_pos_y];
+
+% main dataset
+Trials = [];
+
+% if ndotsOrMat is a not a scalar, get the number of dots that was
+% requested
+if numel(ndotsOrMat)~=1
+    
+    % get number of dots
+    ndots = size(ndotsOrMat,1);
+else
+    
+    % otherwise, use the provided number
+    ndots = ndotsOrMat;
+end
+
+% =========================================================================
+% set main variables
+% =========================================================================
+
+% subject ID
+Trials.ParticipantID    = ones(ndots, 1)*subjNum;
+
+% trial ID
+Trials.Trial            = (1:ndots)';
+
+% dot ID (each dot is identified with a number)
+Trials.DotID            = (1:ndots)';
+
+% block ID
+Trials.Block            = ones(ndots, 1);
+
+
+% =========================================================================
+% prepare data
+% =========================================================================
+if numel(ndotsOrMat)==1         % if ndotsOrMat is a scalar
+    
+    % create a 2D cloud of randomly organized dots
+    Trials.ActualDots_xy      = prototypes_simulate_actDots(figure_width, figure_height, ndotsOrMat, 1);
+    
+    % if you do not want to simulate the response bias, it means that you
+    % expect the responses to be randomly distributed around the actual
+    % dots (with a certain error defined by sd)
+    if ~simulateBias
+        RespDots_x              = Trials.ActualDots_xy(:,1) + random('norm', 0, sd1, size(Trials.ActualDots_xy, 1),1);
+        RespDots_y              = Trials.ActualDots_xy(:,2) + random('norm', 0, sd2, size(Trials.ActualDots_xy, 1),1);      
+        Trials.ResponseDots_xy  = [RespDots_x RespDots_y];
+    end
+else                            % if ndotsOrMat is a matrix
+    ActualDots_x                = ndotsOrMat(:, 1, 1);
+    ActualDots_y                = ndotsOrMat(:, 2, 1);
+    Trials.ActualDots_xy        = [ActualDots_x ActualDots_y];
+    
+    if length(size(ndotsOrMat))~=3
+        Trials.ResponseDots_xy      = Trials.ActualDots_xy + random('norm', 0, 3, size(Trials.ActualDots_xy));
+        
+    elseif length(size(ndotsOrMat))==3
+        Trials.ResponseDots_xy      = [ndotsOrMat(:, 1, 2) ndotsOrMat(:, 2, 2)];
+    end
+%     ndotsOrMat=size(ndotsOrMat,1);
+end
+
+% =========================================================================
+% simulate reponse bias
+% =========================================================================
+% if Responses have not been provided as an input, and it is requested to
+% simulate the response bias (simulateBias==1), add a 'simple' bias. This
+% means that the bias (where participants tend to respond) is expected to
+% be at the centre of each subquadrant
+
+if length(size(ndotsOrMat))~=3 && simulateBias
+    
+    % add simple bias (topleft)
+    idx_topleft             = Trials.ActualDots_xy(:,1)<=figure_width/2 & Trials.ActualDots_xy(:,2)<=figure_height/2;
+    Trials.ResponseDots_xy(idx_topleft, 1) = bias_pos(1) + random('norm', 0, sd1, sum(idx_topleft), 1);
+    Trials.ResponseDots_xy(idx_topleft, 2) = bias_pos(2) + random('norm', 0, sd2, sum(idx_topleft), 1);
+    
+    % add simple bias (topright)
+    idx_topright            = Trials.ActualDots_xy(:,1)>=figure_width/2+1 & Trials.ActualDots_xy(:,2)<=figure_height/2;
+    Trials.ResponseDots_xy(idx_topright, 1) = figure_width-bias_pos(1) + random('norm', 0, sd1, sum(idx_topright), 1);
+    Trials.ResponseDots_xy(idx_topright, 2) = bias_pos(2) + random('norm', 0, sd2, sum(idx_topright), 1);
+    
+    
+    % add simple bias (bottomleft)
+    idx_bottomleft          = Trials.ActualDots_xy(:,1)<=figure_width/2 & Trials.ActualDots_xy(:,2)>=figure_height/2+1;
+    Trials.ResponseDots_xy(idx_bottomleft, 1) = bias_pos(1) + random('norm', 0, sd1, sum(idx_bottomleft), 1);
+    Trials.ResponseDots_xy(idx_bottomleft, 2) = figure_height-bias_pos(2) + random('norm', 0, sd2, sum(idx_bottomleft), 1);
+    
+    % add simple bias (bottomright)
+    idx_bottomright         = Trials.ActualDots_xy(:,1)>=figure_width/2+1 & Trials.ActualDots_xy(:,2)>=figure_height/2+1;
+    Trials.ResponseDots_xy(idx_bottomright, 1) = figure_width-bias_pos(1) + random('norm', 0, sd1, sum(idx_bottomright), 1);
+    Trials.ResponseDots_xy(idx_bottomright, 2) = figure_height-bias_pos(2) + random('norm', 0, sd2, sum(idx_bottomright), 1);
+end
+
+% =========================================================================
+% ending
+% =========================================================================
+% Returns the data as a table
+Trials = struct2table(Trials);
+
+% ADD ADDITIONAL INFORMATION
+if length(size(ndotsOrMat))~=3 && simulateBias
+    Trials.Properties.UserData.Simulated_bias = [figure_width-bias_pos(1) bias_pos(2); bias_pos(1) bias_pos(2); bias_pos(1) figure_width-bias_pos(2); figure_width-bias_pos(1) figure_width-bias_pos(2)];
+end
+
+% prototypes_check_prototable(Trials);
+
+
+% Trials = prototypes_compute_errorVectors(Trials);
+
+
+function ActualDots = prototypes_simulate_actDots(figure_width, figure_height, ndotsOrMat, sd)
+% function ActualDots = prototypes_simulate_actDots(figure_width, figure_height, ndotsOrMat)
+
+% simulate the x dimension (sample from a uniform distribution)
+ActualDots_x    = random('unid', figure_width, ndotsOrMat, sd);
+
+% simulate the y dimension (sample from a uniform distribution)
+ActualDots_y    = random('unid', figure_height, ndotsOrMat, sd);
+
+% combine the two dimensions
+ActualDots      = [ActualDots_x ActualDots_y];
+
+% we do not want overlapping dots, so sample new numbers until there are
+% exaclty the requested number of dots
+ActualDots_unique   = unique(ActualDots, 'rows');
+nUniqueDots         = size(ActualDots_unique,1);
+
+while nUniqueDots<ndotsOrMat
+    ActualDots_x    = random('unid', figure_width, ndotsOrMat, sd);
+    ActualDots_y    = random('unid', figure_height, ndotsOrMat, sd);
+    ActualDots      = [ActualDots_x ActualDots_y];
+        
+    ActualDots_unique = unique(ActualDots, 'rows');
+    nUniqueDots = size(ActualDots_unique,1);
+end
