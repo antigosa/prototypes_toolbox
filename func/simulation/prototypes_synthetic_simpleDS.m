@@ -63,7 +63,11 @@ end
 % add fields that define a prototable
 Trials = prototypes_prototable(Trials);
 Trials = prototypes_set_metadata(Trials, 'Experiment', 'Synthetic data');
-Trials = prototypes_set_metadata(Trials, 'StimulusType', 'Square data');
+if figure_size(1) ~= figure_size(2)
+    Trials = prototypes_set_metadata(Trials, 'StimulusType', 'Rectangle');
+else
+    Trials = prototypes_set_metadata(Trials, 'StimulusType', 'Square');
+end
 Trials = prototypes_set_metadata(Trials, 'ShapeRect', [0 0 figure_size]);
 Trials = prototypes_set_metadata(Trials, 'ShapeContainerRect', [0-figure_size(1)*.1 0-figure_size(2)*.1 figure_size(1)+figure_size(1)*.1 figure_size(2)+figure_size(2)*.1]);
 

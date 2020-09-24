@@ -31,7 +31,15 @@ caxis(clim-zoffset);
 % figure; imagesc(GroupCosineMaps.W_CosineMap_mean);
 axis off;axis equal;
 axis(CosineMap.Properties.UserData.ShapeContainerRect([1 3 2 4]));
-rectangle('Position', CosineMap.Properties.UserData.ShapeRect);
+
+
+rectPos = CosineMap.Properties.UserData.ShapeRect;
+
+if strcmp(prototypes_get_metadata(CosineMap, 'StimulusType'), 'Circle')
+    rectangle('Position', rectPos, 'Curvature', 1);
+else
+    rectangle('Position', rectPos);
+end
 ax              = gca;
 ax.YDir         = prototypes_get_metadata(CosineMap, 'YDir');
 

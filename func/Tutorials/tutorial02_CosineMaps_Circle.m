@@ -1,14 +1,35 @@
-addpath(genpath('..\..\..\prototypes_toolbox'))
-addpath(genpath('..\..\..\..\CoSMoMVPA'))
+%% tutorial01_CosineMaps_Circle.m
+% This tutorial shows the basic usage of the prototypes_toolbox. I will be
+% using a simulated dataset to compute the cosine similarity index maps of
+% individual participants and to fit the data with a categorical adjustment
+% model, or CAM (Huttenlocher et al., 1991). 
+%
+% Note that in order to compute the permutation analysis, you need to have
+% the CoSMoMVPA toolbox (http://cosmomvpa.org/download.html). If you do not
+% have it, you can skip that section and continue with the model fit. 
+%
 
+%% setup
 clear; close all;
+addpath(genpath('..\..\..\prototypes_toolbox'))
+addpath(genpath('..\..\..\CoSMoMVPA'))
 
-% load data
-load('PrototypesData.mat', 'SubjectsData');
+
+%% dataset
+% The data are organized in a table. Each row is a participant's trial,
+% meaning a response to a dot. The dot position (xy coordinates) is stored 
+% in a variable called 'ActualDots_xy' and each dot has a dot id ('DotID'). 
+% Each response (xy coordinates) is stored in a variable called
+% 'ResponseDots_xy'. The coordinates are in pixels and relative to the
+% object rect ('ShapeRect', e.g. a square or a rectangle). The origin is
+% the bottom-left (unless data have been normalised).
+
+% load the dataset ('SubjectsData')
+load('PrototypesData_Circle.mat', 'SubjectsData');
 
 % data info
-subjlist    = unique(SubjectsData.ParticipantID);
-nsubj       = length(subjlist);
+prototypes_info(SubjectsData);
+nsubj   = 6;
 
 % compute error vectors
 SubjectsData = prototypes_compute_errorVectors(SubjectsData);
@@ -103,6 +124,18 @@ figure;prototypes_plot_cosineMap(groupStat, [], [-15 15], 'W_SimixSubject_Tcorr'
 
 
 %% model fit: find prototypes and w
+% In a few words, the category adjustment theory (Huttenlocher et al., 1991) 
+% claims that when recalling an object position from memory two types of
+% information are combined: the metric (actual location) information and
+% the category information. The category information are used because the
+% metric information are noisy. As a consequence, people report a bias
+% towards the spatial category. 
+% Therefore, the model has N+1 parameters, where N is the number of
+% prototypes. Generally, in a geometrical shape (e.g. a square) the number 
+% of prototypes is 4. The 5th parameter ('w') concerns how much of category
+% information is used over the metric information. It varies from 0 (only
+% category information used) to 1 (only metric information used). Here, I
+% am going to estimate these 5 parameters using a fitting procedure. 
 
 % initial parameters for fitting the data
 param0              = [];

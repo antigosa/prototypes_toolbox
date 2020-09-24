@@ -30,7 +30,11 @@ q.LineWidth     = 1;
 axis off;axis equal;
 axis(Trials.Properties.UserData.ShapeContainerRect([1 3 2 4]));
 rectPos     = [Trials.Properties.UserData.ShapeRect([1 2]) Trials.Properties.UserData.ShapeRect([3 4])-Trials.Properties.UserData.ShapeRect([1 2])];
-rectangle('Position', rectPos);
+if strcmp(prototypes_get_metadata(Trials, 'StimulusType'), 'Circle')
+    rectangle('Position', rectPos, 'Curvature', 1);
+else
+    rectangle('Position', rectPos);
+end
 ax              = gca;
 ax.YDir         = prototypes_get_metadata(Trials, 'YDir');
 if strcmp(ParticipantID, 'group')

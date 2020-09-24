@@ -684,7 +684,7 @@ for s = 1:nsubj
     param_best{s}      = prototypes_fit_model(aSubject, @prototypes_model_CAM, param0, opt);
 end
 
-%% test 13 - save data
+%% test 13 - save data ('Rectangle')
 clear;
 close all;
 ndots_x                 = 20;
@@ -716,4 +716,58 @@ SubjectsData            = prototypes_model_CAM(SubjectsData, opt);
 SubjectsData.CategoryID = [];
 SubjectsData.CategoryPrototypes = [];
 
-save('PrototypesData', 'SubjectsData');
+SubjectsData.Age        = reshape(repmat(round(random('norm', 30, 5, nsubj, 1)), 1, ndots)', [],1);
+Gender     = reshape(repmat(random('unid', 2, nsubj, 1), 1, ndots)', [],1);
+SubjectsData.Gender     = cell(length(SubjectsData.Age), 1);
+SubjectsData.Gender(Gender==1)     = {'Female'};
+SubjectsData.Gender(Gender==2)     = {'Male'};
+
+
+
+save('PrototypesData_Rectangle', 'SubjectsData');
+
+
+%% test 13 - save data ('Rectangle')
+clear;
+close all;
+ndots_x                 = 20;
+ndots_y                 = 10;
+grid_offset             = 20;
+dot_noise               = 0;
+multOf                  = 4;
+ShapeDim                = [300 300];
+nsubj                   = 6;
+
+nrows                   = 10;
+
+% create synthetic data
+ActualDots_xy           = prototypes_generate_grid('Circle', ShapeDim, ndots_x, ndots_y, multOf, grid_offset, dot_noise);
+SubjectsData            = prototypes_synthetic_simpleDS(ActualDots_xy, ShapeDim, 0, nsubj);
+SubjectsData.Properties.UserData.StimulusType = 'Circle';
+
+
+Dots = prototypes_info(SubjectsData, 'Dots');
+ndots = Dots.Ndots;
+
+% set the options for the CAM model
+opt.w                   = 0.75;
+opt.prototypes          = [0.25 0.25; 0.25 0.75; 0.75 0.25; 0.75 0.75].*ShapeDim;
+opt.method              = 'CategoryPrototypes';
+
+
+% generate data
+opt.stdNoise            = 5;
+SubjectsData            = prototypes_model_CAM(SubjectsData, opt);
+
+SubjectsData.CategoryID = [];
+SubjectsData.CategoryPrototypes = [];
+
+SubjectsData.Age        = reshape(repmat(round(random('norm', 30, 5, nsubj, 1)), 1, ndots)', [],1);
+Gender     = reshape(repmat(random('unid', 2, nsubj, 1), 1, ndots)', [],1);
+SubjectsData.Gender     = cell(length(SubjectsData.Age), 1);
+SubjectsData.Gender(Gender==1)     = {'Female'};
+SubjectsData.Gender(Gender==2)     = {'Male'};
+
+prototypes_plot_dots(SubjectsData)
+
+save('PrototypesData_Circle', 'SubjectsData');
