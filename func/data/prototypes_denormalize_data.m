@@ -1,5 +1,5 @@
-function Trials = prototypes_normalize_data(Trials, dim)
-% function Trials = prototypes_normalize_data(Trials, dim)
+function ProtoTable = prototypes_denormalize_data(ProtoTable, dim)
+% function ProtoTable = prototypes_normalize_data(ProtoTable, dim)
 %
 % Target and Response dots will be scaled in axis [-1 1 -1 1];
 %
@@ -24,10 +24,10 @@ function Trials = prototypes_normalize_data(Trials, dim)
 if nargin==1;dim=[];end
 
 if isempty(dim)
-    if Trials.Properties.UserData.orig.ShapeRect(3) < Trials.Properties.UserData.orig.ShapeRect(4)
+    if ProtoTable.Properties.UserData.orig.ShapeRect(3) < ProtoTable.Properties.UserData.orig.ShapeRect(4)
         dim = 2;
         
-    elseif Trials.Properties.UserData.orig.ShapeRect(3) > Trials.Properties.UserData.orig.ShapeRect(4)
+    elseif ProtoTable.Properties.UserData.orig.ShapeRect(3) > ProtoTable.Properties.UserData.orig.ShapeRect(4)
         dim = 1;
     else
         dim = 'both';
@@ -36,22 +36,22 @@ end
 
 
 % center data to zero
-ActualDots_xy = Trials.ActualDots_xy;
-RespDots_xy = Trials.ResponseDots_xy;
+ActualDots_xy = ProtoTable.ActualDots_xy;
+RespDots_xy = ProtoTable.ResponseDots_xy;
 
 % denormalize
 switch dim
     case {1}
-        RectWidth   = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(3);
+        RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
         RectHeight  = RectWidth;
         
     case {2}
-        RectHeight  = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(4);
+        RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
         RectWidth   = RectHeight;
         
     case 'both'        
-        RectWidth   = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(3);
-        RectHeight  = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(4);
+        RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
+        RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
 end
 
 
@@ -66,57 +66,20 @@ RespDots_xy(:,2)    = RespDots_xy(:,2).*(RectHeight/2);
 
 % center data to original space
 
-RectWidth   = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(3);
-RectHeight  = ones(size(Trials, 1), 1)*Trials.Properties.UserData.orig.ShapeRect(4);
+RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
+RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
 ActualDots_xy       = ActualDots_xy+[RectWidth/2 RectHeight/2];
 RespDots_xy         = RespDots_xy+[RectWidth/2 RectHeight/2];
 
 
 % update table
-Trials.ActualDots_xy        = ActualDots_xy;
-Trials.ResponseDots_xy      = RespDots_xy;
+ProtoTable.ActualDots_xy        = ActualDots_xy;
+ProtoTable.ResponseDots_xy      = RespDots_xy;
 
-Trials.Properties.UserData.ShapeRect            = Trials.Properties.UserData.orig.ShapeRect;
-Trials.Properties.UserData.ShapeContainerRect   = Trials.Properties.UserData.orig.ShapeContainerRect;
+ProtoTable.Properties.UserData.ShapeRect            = ProtoTable.Properties.UserData.orig.ShapeRect;
+ProtoTable.Properties.UserData.ShapeContainerRect   = ProtoTable.Properties.UserData.orig.ShapeContainerRect;
 
 
-if any(strcmp(Trials.Properties.VariableNames, 'errorXY'))
-    Trials = prototypes_compute_errorVectors(Trials);
+if any(strcmp(ProtoTable.Properties.VariableNames, 'errorXY'))
+    ProtoTable = prototypes_compute_errorVectors(ProtoTable);
 end
-
-% if any(strcmp(Trials.Properties.VariableNames, 'ActualDots_polar'))
-%     Trials = prototypes_compute_polarData(Trials);
-% end
-%
-% if isfield(Trials.Properties.UserData, 'kmeans')
-%     RectWidth = RectWidth(1);
-%     RectHeight = RectHeight(1);
-%     dataTypes = fieldnames(Trials.Properties.UserData.kmeans);
-%     for f = 1:length(dataTypes)
-%         Trials.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid = Trials.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid-[RectWidth/2 RectHeight/2];
-%         Trials.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid = Trials.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid./[RectWidth/2 RectHeight/2];
-%     end
-% end
-%
-% if isfield(Trials.Properties.UserData, 'Models')
-%     RectWidth = RectWidth(1);
-%     RectHeight = RectHeight(1);
-%     model_list = fieldnames(Trials.Properties.UserData.Models);
-%
-%     % I SHOULD DO THIS FOR ALL PARTICIPANTS!!
-%     for m = 1:numel(model_list)
-%         prototypes_pos = (Trials.Properties.UserData.Models.(model_list{m}).param.prototypes{1}-[RectWidth/2 RectHeight/2]);
-%         prototypes_pos = prototypes_pos./([RectWidth/2 RectHeight/2]);
-%         Trials.Properties.UserData.Models.(model_list{m}).param.prototypes{1} = prototypes_pos;
-%
-%         if isfield(Trials.Properties.UserData.Models.(model_list{m}), 'PredictedResp_xy')
-%             PredictedResp_xy = (Trials.Properties.UserData.Models.(model_list{m}).PredictedResp_xy-[RectWidth/2 RectHeight/2]);
-%             PredictedResp_xy = PredictedResp_xy./([RectWidth/2 RectHeight/2]);
-%             Trials.Properties.UserData.Models.(model_list{m}).PredictedResp_xy = PredictedResp_xy;
-%         end
-%
-%
-%     end
-%
-% end
-

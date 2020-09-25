@@ -1,23 +1,23 @@
-function T = prototypes_prototable(T)
-% function T = prototypes_prototable(T)
+function ProtoTable = prototypes_prototable(ProtoTable)
+% function ProtoTable = prototypes_prototable(ProtoTable)
 %
 % 
 % =========================================================================
 % Fundamental variables
 % =========================================================================
-% 'ParticipantID', 'Trial', 'DotID', Block, 'ActualDots_xy','ResponseDots_xy'
+% 'ParticipantID', 'ProtoTablerial', 'DotID', Block, 'ActualDots_xy','ResponseDots_xy'
 
-if nargin==0;T = table;end
+if nargin==0;ProtoTable = table;end
 % =========================================================================
 % Fundamental Fields
 % =========================================================================
-T = prototypes_set_metadata(T, 'ScreenRect', get(0,'ScreenSize'));      % in px
-T = prototypes_set_metadata(T, 'ShapeContainerRect', [0 0 nan nan]);    % in px
-T = prototypes_set_metadata(T, 'ShapeRect', [0 0 nan nan]);             % in px
-T = prototypes_set_metadata(T, 'YDir', 'normal');                       % 'normal' | 'reverse'
+ProtoTable = prototypes_set_metadata(ProtoTable, 'ScreenRect', get(0,'ScreenSize'));      % in px
+ProtoTable = prototypes_set_metadata(ProtoTable, 'ShapeContainerRect', [0 0 nan nan]);    % in px
+ProtoTable = prototypes_set_metadata(ProtoTable, 'ShapeRect', [0 0 nan nan]);             % in px
+ProtoTable = prototypes_set_metadata(ProtoTable, 'YDir', 'normal');                       % 'normal' | 'reverse'
 %
-% T = prototypes_set_metadata(T, 'RectHeight', '');       % in px
-% T = prototypes_set_metadata(T, 'RectWidth', '');        % in px
+% ProtoTable = prototypes_set_metadata(ProtoTable, 'RectHeight', '');       % in px
+% ProtoTable = prototypes_set_metadata(ProtoTable, 'RectWidth', '');        % in px
 
 
 
@@ -25,26 +25,26 @@ T = prototypes_set_metadata(T, 'YDir', 'normal');                       % 'norma
 % Important Fields
 % =========================================================================
 % Experiment name
-T = prototypes_set_metadata(T, 'Experiment', '');
+ProtoTable = prototypes_set_metadata(ProtoTable, 'Experiment', '');
 
-% The type of stimulus (e.g. 'Circle', 'Rectangle', 'Body', 'Hand')
-T = prototypes_set_metadata(T, 'StimulusType', '');
+% ProtoTablehe type of stimulus (e.g. 'Circle', 'Rectangle', 'Body', 'Hand')
+ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusProtoTableype', '');
 
-% The filename of the stimulus image
-T = prototypes_set_metadata(T, 'StimulusFileName', '');
+% ProtoTablehe filename of the stimulus image
+ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusFileName', '');
 
-%T = prototypes_set_metadata(T, 'Rectangle', [0 0 nan nan]);
+%ProtoTable = prototypes_set_metadata(ProtoTable, 'Rectangle', [0 0 nan nan]);
 
 % Location to save the data
-T = prototypes_set_metadata(T, 'FolderName', '');
+ProtoTable = prototypes_set_metadata(ProtoTable, 'FolderName', '');
 
 % File name to save the data
-T = prototypes_set_metadata(T, 'FileName', '');
+ProtoTable = prototypes_set_metadata(ProtoTable, 'FileName', '');
 
 % Screen details
-T = prototypes_set_metadata(T, 'ScreenDepth', get(0,'ScreenDepth'));
-T = prototypes_set_metadata(T, 'ScreenPixelsPerInch', get(0,'ScreenPixelsPerInch'));
-T = prototypes_set_metadata(T, 'Units', get(0,'Units'));
+ProtoTable = prototypes_set_metadata(ProtoTable, 'ScreenDepth', get(0,'ScreenDepth'));
+ProtoTable = prototypes_set_metadata(ProtoTable, 'ScreenPixelsPerInch', get(0,'ScreenPixelsPerInch'));
+ProtoTable = prototypes_set_metadata(ProtoTable, 'Units', get(0,'Units'));
 
 
 

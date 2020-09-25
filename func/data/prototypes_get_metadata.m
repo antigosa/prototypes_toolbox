@@ -1,5 +1,5 @@
-function v = prototypes_get_metadata(T, k)
-% function v = prototypes_get_metadata(T, k, v)
+function v = prototypes_get_metadata(ProtoTable, k)
+% function v = prototypes_get_metadata(ProtoTable, k, v)
 %
 %
 % - Simulated_bias
@@ -9,7 +9,7 @@ function v = prototypes_get_metadata(T, k)
 % - ShapeRect
 % - YDir
 % - Experiment
-% - StimulusType
+% - StimulusProtoTableype
 % - StimulusFileName
 % - FolderName
 % - FileName
@@ -17,9 +17,9 @@ function v = prototypes_get_metadata(T, k)
 % - ScreenPixelsPerInch
 % - Units
 %
-% T is a prototable
+% ProtoTable is a prototable
 %
-% Typical metadata (EXAMPLE)
+% ProtoTableypical metadata (EXAMPLE)
 % ===================
 % 	User Data:
 % ===================
@@ -29,7 +29,7 @@ function v = prototypes_get_metadata(T, k)
 %               ShapeRect: [0 0 600 300]
 %                    YDir: 'normal'
 %              Experiment: 'Synthetic data'
-%            StimulusType: 'Square data'
+%            StimulusProtoTableype: 'Square data'
 %        StimulusFileName: ''
 %              FolderName: ''
 %                FileName: ''
@@ -38,15 +38,15 @@ function v = prototypes_get_metadata(T, k)
 %                   Units: 'pixels'
 
 if strcmp(k, 'ShapeDim')
-    v = T.Properties.UserData.ShapeRect([3 4]);
+    v = ProtoTable.Properties.UserData.ShapeRect([3 4]);
     return;
 end
 
 if iscell(k)
-    v = T.Properties.UserData;
+    v = ProtoTable.Properties.UserData;
     for i = 1:length(k)
         v = v.(k{i});    
     end
 else
-    v = T.Properties.UserData.(k);
+    v = ProtoTable.Properties.UserData.(k);
 end

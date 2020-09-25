@@ -1,11 +1,14 @@
-function groupStat = prototypes_stat_secondLevel(groupData, opt)
-% function [groupStat, groupData] = prototypes_stat_secondLevel(groupData, opt)
-% subj_Trials can be a cellarray (1 cell contains the table of each
-% subject) or it can already be a table containing all subjects
+function groupStat = prototypes_stat_secondLevel(csm_or_cell, opt)
+% function groupStat = prototypes_stat_secondLevel(csm, opt)
 %
-% .Group indicate the type of test
-% e.g. subjTrials.Group = ones(size(subjTrials, 1),1);
-% addpath_cosmomvpa;
+% If input is a csm, it indicates that maps will be compared to zero; if it
+% is a cell of csms (max 2 elements), it indicates that the maps will be
+% compared one with another. 
+% 
+% If you want to run a permutation analysis, you need to have the CoSMoMVPA
+% toobox (http://cosmomvpa.org/download.html) in the path
+%
+
 
 if nargin==1;opt = [];end
 
@@ -15,27 +18,27 @@ if ~isfield(opt, 'niter'); opt.niter=5000;end
 if ~isfield(opt, 'cluster_stat'); opt.cluster_stat='maxsum';end
 if ~isfield(opt, 'dataType'); opt.dataType='W_SimixSubject';end
 
-if iscell(groupData)
+if iscell(csm_or_cell)
     testType = 'twoSamples';
 else
     testType = 'oneSamples';
     
 end
 
-% Groups = unique(groupData.Group);
+% Groups = unique(csm.Group);
 switch testType
     case 'oneSamples'
-        groupStat = prototypes_stat_secondLevel_oneSampleT(groupData, opt);
-        groupStat.Properties.UserData = groupData.Properties.UserData;
+        groupStat = prototypes_stat_secondLevel_oneSampleT(csm_or_cell, opt);
+        groupStat.Properties.UserData = csm_or_cell.Properties.UserData;
         
     case 'twoSamples'
-        groupStat = prototypes_stat_secondLevel_twoSamplesT(groupData, opt);
-        groupStat.Properties.UserData = groupData{1}.Properties.UserData;
+        groupStat = prototypes_stat_secondLevel_twoSamplesT(csm_or_cell, opt);
+        groupStat.Properties.UserData = csm_or_cell{1}.Properties.UserData;
 end
 
 
 
-function groupStat = prototypes_stat_secondLevel_oneSampleT(groupData, opt)
+function groupStat = prototypes_stat_secondLevel_oneSampleT(csm, opt)
 
 runPermutation=opt.runPermutation;
 
@@ -50,8 +53,7 @@ else
 end
 
 
-
-ds              = prototypes_simMap2cosmo(groupData.(opt.dataType));
+ds              = prototypes_simMap2cosmo(csm.(opt.dataType));
 removed_idx     = all(ds.samples==0);
 ds_tmp          = cosmo_remove_useless_data(ds);
 
@@ -130,9 +132,9 @@ end
 KDEAnalysis=0;
 
 if KDEAnalysis
-    %     groupStat.Properties.UserData.cosine_map.W_SimixSubject_avg = nanmean(groupData.Properties.UserData.cosine_map.(opt.dataType), 3);
+    %     groupStat.Properties.UserData.cosine_map.W_SimixSubject_avg = nanmean(csm.Properties.UserData.cosine_map.(opt.dataType), 3);
     
-    ds=prototypes_simMap2cosmo(groupData.Properties.UserData.KDE.PDE_map);
+    ds=prototypes_simMap2cosmo(csm.Properties.UserData.KDE.PDE_map);
     
     res = prototypes_stat_cosinemap(ds, 'method', 'ttest', 'test_type', 'onesampleT', 'puncorr', puncorr);
     
@@ -170,20 +172,20 @@ end
 % add important info
 groupStat.puncorr                   = puncorr;
 groupStat.df                        = res.df;
-groupStat.ParticipantID             = unique(groupData.ParticipantID);
-groupStat.alphavalue                = groupData.alphavalue;
+groupStat.ParticipantID             = unique(csm.ParticipantID);
+groupStat.alphavalue                = csm.alphavalue;
 
-function groupStat = prototypes_stat_secondLevel_twoSamplesT(groupData, opt)
+function groupStat = prototypes_stat_secondLevel_twoSamplesT(csm, opt)
 
 runPermutation=opt.runPermutation;
 
-groupData1 = groupData{1};
-groupData2 = groupData{2};
+csm1 = csm{1};
+csm2 = csm{2};
 
 % only perform cosine analysis if both datasets have cosine_map
-cosineAnalysis = all([isfield(groupData1.Properties.UserData, 'cosine_map') isfield(groupData2.Properties.UserData, 'cosine_map')]);
+cosineAnalysis = all([isfield(csm1.Properties.UserData, 'cosine_map') isfield(csm2.Properties.UserData, 'cosine_map')]);
 
-Analysis = {strcat(groupData1.Properties.UserData.Experiment, 'VS', groupData2.Properties.UserData.Experiment)};
+Analysis = {strcat(csm1.Properties.UserData.Experiment, 'VS', csm2.Properties.UserData.Experiment)};
 
 % =========================================================================
 % descriptive
@@ -196,19 +198,19 @@ end
 
 
 
-testType = whichStatTest(groupData1, groupData2);
+testType = whichStatTest(csm1, csm2);
 
-nSubj1 = length(unique(groupData1.ParticipantID));
-ds1=prototypes_simMap2cosmo(groupData1.(opt.dataType));
-%     ds1.sa.group = repmat(groupData1.Group(1), nSubj1, 1);
+nSubj1 = length(unique(csm1.ParticipantID));
+ds1=prototypes_simMap2cosmo(csm1.(opt.dataType));
+%     ds1.sa.group = repmat(csm1.Group(1), nSubj1, 1);
 ds1.sa.group = ones(nSubj1, 1);
-ds1.sa.subject = unique(groupData1.ParticipantID);
+ds1.sa.subject = unique(csm1.ParticipantID);
 
-nSubj2 = length(unique(groupData2.ParticipantID));
-ds2=prototypes_simMap2cosmo(groupData2.(opt.dataType));
-%     ds2.sa.group = repmat(groupData2.Group(1), nSubj2, 1);
+nSubj2 = length(unique(csm2.ParticipantID));
+ds2=prototypes_simMap2cosmo(csm2.(opt.dataType));
+%     ds2.sa.group = repmat(csm2.Group(1), nSubj2, 1);
 ds2.sa.group = ones(nSubj2, 1)*2;
-ds2.sa.subject = unique(groupData2.ParticipantID);
+ds2.sa.subject = unique(csm2.ParticipantID);
 
 ds = cosmo_stack({ds1, ds2}, 1);
 
@@ -266,8 +268,8 @@ end
 % add important info
 groupStat.puncorr                   = puncorr;
 groupStat.df                        = res.df;
-groupStat.ParticipantID             = [unique(groupData1.ParticipantID)';unique(groupData2.ParticipantID)'];
-groupStat.alphavalue                = groupData1.alphavalue;
+groupStat.ParticipantID             = [unique(csm1.ParticipantID)';unique(csm2.ParticipantID)'];
+groupStat.alphavalue                = csm1.alphavalue;
 
 % end
 

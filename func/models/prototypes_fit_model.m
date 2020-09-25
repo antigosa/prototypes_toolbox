@@ -1,5 +1,5 @@
-function param = prototypes_fit_model(Trials, modelfun, param0, opt)
-% function Trials = prototypes_fit_model(Trials, modelfun, opt)
+function param = prototypes_fit_model(ProtoTable, modelfun, param0, opt)
+% function ProtoTable = prototypes_fit_model(ProtoTable, modelfun, opt)
 %
 % default model: prototypes_model_CAM
 
@@ -10,7 +10,7 @@ if ~isfield(opt, 'fit_wOnly'); opt.fit_wOnly=0;end
 if ~isfield(opt, 'DisplayIter'); opt.DisplayIter='Off';end
 
 
-errfun = @(param)  prototypes_errfun(modelfun, param, Trials, opt);
+errfun = @(param)  prototypes_errfun(modelfun, param, ProtoTable, opt);
 
 
 switch func2str(modelfun)
@@ -105,7 +105,7 @@ end
 param.Err = fR;
 param.R2 = 1-param.Err;
 
-N = size(Trials,1);
+N = size(ProtoTable,1);
 k = length(fP);
 param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 
@@ -116,11 +116,11 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % % 
 % % % 
 % % % 
-% % % subjlist = unique(Trials.subj_id);
+% % % subjlist = unique(ProtoTable.subj_id);
 % % % nsubj = length(subjlist);
 % % % 
-% % % Trials = prototypes_assignPrototypes2Targets(Trials, opt.Param0);
-% % % Model = Trials.Properties.UserData.Models.(model_name);
+% % % ProtoTable = prototypes_assignPrototypes2Targets(ProtoTable, opt.Param0);
+% % % Model = ProtoTable.Properties.UserData.Models.(model_name);
 % % % 
 % % % if nsubj>1
 % % %     % if there are many participants    
@@ -129,7 +129,7 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %     Model.(model_name).param = table;
 % % %     for s=1:nsubj
 % % %         subNum=subjlist(s);        
-% % %         subjTrials = prototypes_select_subjects(Trials, subNum);
+% % %         subjProtoTable = prototypes_select_subjects(ProtoTable, subNum);
 % % %                
 % % %         cat_ids = unique(Model.param.CategoryID);
 % % %     
@@ -141,13 +141,13 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %             cat_id = cat_ids(c);
 % % %             Param0 = Model.param;
 % % % 
-% % %             Trials_toFit = subjTrials(subjTrials.CategoryID==cat_id,:);
-% % %             Trials_toFit.Properties.UserData.Models.(model_name).param(Trials_toFit.Properties.UserData.Models.(model_name).param.CategoryID~=cat_id, :)=[];
+% % %             ProtoTable_toFit = subjProtoTable(subjProtoTable.CategoryID==cat_id,:);
+% % %             ProtoTable_toFit.Properties.UserData.Models.(model_name).param(ProtoTable_toFit.Properties.UserData.Models.(model_name).param.CategoryID~=cat_id, :)=[];
 % % %             Param0(Param0.CategoryID~=cat_id,:)=[];
 % % % 
 % % %             % fit the data
-% % %             param{c} = prototypes_fit_model_aSubj(Trials_toFit, modelfun, Param0, opt);
-% % %             param{c}.CategoryID = Param0.CategoryID;%unique(Trials_toFit.CategoryID);
+% % %             param{c} = prototypes_fit_model_aSubj(ProtoTable_toFit, modelfun, Param0, opt);
+% % %             param{c}.CategoryID = Param0.CategoryID;%unique(ProtoTable_toFit.CategoryID);
 % % %         end
 % % % 
 % % %         param = vertcat(param{:});        
@@ -158,12 +158,12 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %         Model.(model_name).param = [Model.(model_name).param; atable];
 % % %     end
 % % %     
-% % %     if isfield(Trials.Properties.UserData.Models, model_name)
+% % %     if isfield(ProtoTable.Properties.UserData.Models, model_name)
 % % %         warning('removing previous fit');
 % % %     end
-% % %     Trials.Properties.UserData.Models.(model_name).param = Model.(model_name).param;
+% % %     ProtoTable.Properties.UserData.Models.(model_name).param = Model.(model_name).param;
 % % %     
-% % % %     Trials              = prototypes_denormalize_data(Trials);
+% % % %     ProtoTable              = prototypes_denormalize_data(ProtoTable);
 % % %         
 % % % else
 % % %     % =====================================================================
@@ -184,13 +184,13 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %         cat_id = cat_ids(c);
 % % %         Param0 = Model.param;
 % % % 
-% % %         Trials_toFit = Trials(Trials.CategoryID==cat_id,:);
-% % %         Trials_toFit.Properties.UserData.Models.(model_name).param(Trials_toFit.Properties.UserData.Models.(model_name).param.CategoryID~=cat_id, :)=[];
+% % %         ProtoTable_toFit = ProtoTable(ProtoTable.CategoryID==cat_id,:);
+% % %         ProtoTable_toFit.Properties.UserData.Models.(model_name).param(ProtoTable_toFit.Properties.UserData.Models.(model_name).param.CategoryID~=cat_id, :)=[];
 % % %         Param0(Param0.CategoryID~=cat_id,:)=[];
 % % %         
 % % %         % fit the data
-% % %         param{c} = prototypes_fit_model_aSubj(Trials_toFit, modelfun, Param0, opt);
-% % %         param{c}.CategoryID = Param0.CategoryID; %  unique(Trials_toFit.CategoryID);
+% % %         param{c} = prototypes_fit_model_aSubj(ProtoTable_toFit, modelfun, Param0, opt);
+% % %         param{c}.CategoryID = Param0.CategoryID; %  unique(ProtoTable_toFit.CategoryID);
 % % %     end
 % % %     
 % % %     param = vertcat(param{:});
@@ -202,21 +202,21 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %     atable = [table(subj_id), param];
 % % %     
 % % %     % add to the prototypes table
-% % %     if isfield(Trials.Properties.UserData.Models, model_name)
+% % %     if isfield(ProtoTable.Properties.UserData.Models, model_name)
 % % %         warning('removing previous fit');
-% % %         Trials.Properties.UserData.Models.(model_name).param = [];
+% % %         ProtoTable.Properties.UserData.Models.(model_name).param = [];
 % % %     end
-% % % %     Trials.Properties.UserData.Models.(model_name).param = Model.(model_name).param;    
-% % %     Trials.Properties.UserData.Models.(model_name).param = atable;
-% % %     Trials.Properties.UserData.Models.(model_name).Description = 'optimal parameters obtained by the fitting procedure';
+% % % %     ProtoTable.Properties.UserData.Models.(model_name).param = Model.(model_name).param;    
+% % %     ProtoTable.Properties.UserData.Models.(model_name).param = atable;
+% % %     ProtoTable.Properties.UserData.Models.(model_name).Description = 'optimal parameters obtained by the fitting procedure';
 % % % 
 % % % end
 % % % 
 % % % 
-% % % function param = prototypes_fit_model_aSubj(Trials, modelfun, Param0, opt)
+% % % function param = prototypes_fit_model_aSubj(ProtoTable, modelfun, Param0, opt)
 % % % 
 % % % if ~isfield(opt, 'DisplayIter'); opt.DisplayIter='Off';end
-% % % errfun = @(param)  prototypes_errfun(modelfun, param, Trials, opt);
+% % % errfun = @(param)  prototypes_errfun(modelfun, param, ProtoTable, opt);
 % % % 
 % % % 
 % % % switch func2str(modelfun)
@@ -312,20 +312,20 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % % param.Err = repmat(fR, size(param,1),1);
 % % % param.R2 = 1-param.Err;
 % % % 
-% % % N = size(Trials,1);
+% % % N = size(ProtoTable,1);
 % % % k = length(fP);
 % % % param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % % 
 % % % 
 % % % 
-% % % function [Trials, opt] = helper_normalize_data(Trials, opt)
+% % % function [ProtoTable, opt] = helper_normalize_data(ProtoTable, opt)
 % % % 
 % % % 
-% % % if ~isfield(Trials.Properties.UserData, 'orig')
+% % % if ~isfield(ProtoTable.Properties.UserData, 'orig')
 % % %     
-% % %     Trials = prototypes_normalize_data(Trials);
+% % %     ProtoTable = prototypes_normalize_data(ProtoTable);
 % % %     
-% % %     orig = Trials.Properties.UserData.orig;
+% % %     orig = ProtoTable.Properties.UserData.orig;
 % % %     
 % % %     opt.P0 = opt.P0 - [orig.RectWidth/2 orig.RectHeight/2];
 % % %     opt.P0 = opt.P0 ./ [orig.RectWidth/2 orig.RectHeight/2];
@@ -336,14 +336,14 @@ param.R2_adj = 1-((1-param.R2).*(N-1))./(N-k-1);
 % % %     end
 % % % end
 % % % 
-% % % function Model = helper_initialize_modelStruc(Trials, model_name)
+% % % function Model = helper_initialize_modelStruc(ProtoTable, model_name)
 % % % 
 % % % % check if already exists a model fit for this dataset
-% % % if isfield(Trials.Properties.UserData, 'Models')
-% % %     if isfield(Trials.Properties.UserData.Models, model_name)        
-% % %         Model.(model_name).param = Trials.Properties.UserData.Models.(model_name).param;
+% % % if isfield(ProtoTable.Properties.UserData, 'Models')
+% % %     if isfield(ProtoTable.Properties.UserData.Models, model_name)        
+% % %         Model.(model_name).param = ProtoTable.Properties.UserData.Models.(model_name).param;
 % % %     else
-% % %         Model = Trials.Properties.UserData.Models;
+% % %         Model = ProtoTable.Properties.UserData.Models;
 % % %         Model.(model_name).param = table;
 % % %     end
 % % % else

@@ -1,13 +1,13 @@
-function CosineMap = prototypes_compute_cosineMap(Trials, alphavalue, nproc, opt)
-% function CosineMap = prototypes_compute_cosineMap(Trials, alphavalue, nproc, opt)
+function csm = prototypes_compute_cosineMap(ProtoTable, alphavalue, nproc, opt)
+% function csm = prototypes_compute_cosineMap(ProtoTable, alphavalue, nproc, opt)
 %
 % Compute the cosine maps taking into account the error vectors that are
-% supposed to be in 'Trials'. Trials is a prototable. A cosine map will be
-% computed separately for each participant. 
+% supposed to be in 'ProtoTable'. ProtoTable is a 'prototable' type. 
+% A cosine map will be computed separately for each participant. 
 % =========================================================================
 % INPUT
 % =========================================================================
-% Trials: 
+% ProtoTable: 
 % - a prototable
 % - mandatory fields:
 % -- .ParticipantID
@@ -34,7 +34,7 @@ function CosineMap = prototypes_compute_cosineMap(Trials, alphavalue, nproc, opt
 % OUTPUT
 % =========================================================================
 % 
-% CosineMap:
+% csm:
 % - a structure
 % - .SimixSubject; a 3D matrix (xdim, ydim, nsubjects) containing the
 %   cosine similarity values (unweighted)
@@ -46,32 +46,32 @@ if ~exist('nproc', 'var'); nproc=1;end
 if ~exist('opt', 'var'); opt=[];end
 
 % get list of participants
-subjlist    = unique(Trials.ParticipantID);
+subjlist    = unique(ProtoTable.ParticipantID);
 nsubj       = length(subjlist);
 
 
-CosineMap_subj = cell(1, nsubj);
+csm_subj = cell(1, nsubj);
 
 for s = 1:nsubj
     subjNum = subjlist(s);
-    %Trials_subj{s} = prototypes_select_subjects(Trials, subjNum);
-    Trial_subj = Trials(Trials.ParticipantID==subjNum, :);
-    CosineMap_subj{s} = prototypes_compute_cosineMap_aSubj(Trial_subj, alphavalue, nproc, opt);
+    %ProtoTable_subj{s} = prototypes_select_subjects(ProtoTable, subjNum);
+    Trial_subj = ProtoTable(ProtoTable.ParticipantID==subjNum, :);
+    csm_subj{s} = prototypes_compute_cosineMap_aSubj(Trial_subj, alphavalue, nproc, opt);
     
     if s == 1
-        CosineMap.SimixSubject = zeros(size(CosineMap_subj{s}.SimixSubject, 1), size(CosineMap_subj{s}.SimixSubject, 2), nsubj);
-        CosineMap.W_SimixSubject = zeros(size(CosineMap_subj{s}.W_SimixSubject, 1), size(CosineMap_subj{s}.W_SimixSubject, 2), nsubj);
+        csm.SimixSubject = zeros(size(csm_subj{s}.SimixSubject, 1), size(csm_subj{s}.SimixSubject, 2), nsubj);
+        csm.W_SimixSubject = zeros(size(csm_subj{s}.W_SimixSubject, 1), size(csm_subj{s}.W_SimixSubject, 2), nsubj);
     end
-    CosineMap.SimixSubject(:, :, s) = CosineMap_subj{s}.SimixSubject;
-    CosineMap.W_SimixSubject(:, :, s) = CosineMap_subj{s}.W_SimixSubject;
+    csm.SimixSubject(:, :, s) = csm_subj{s}.SimixSubject;
+    csm.W_SimixSubject(:, :, s) = csm_subj{s}.W_SimixSubject;
 end
-CosineMap.ParticipantID         = unique(Trials.ParticipantID);
-CosineMap.Properties.UserData   = Trials.Properties.UserData;
-CosineMap.alphavalue            = alphavalue;
+csm.ParticipantID         = unique(ProtoTable.ParticipantID);
+csm.Properties.UserData   = ProtoTable.Properties.UserData;
+csm.alphavalue            = alphavalue;
 
 
 
-function CosineMap = prototypes_compute_cosineMap_aSubj(Trials, alphavalue, nproc, opt)
+function csm = prototypes_compute_cosineMap_aSubj(ProtoTable, alphavalue, nproc, opt)
 
 if nargin==2;nproc=1;end
 
@@ -80,22 +80,22 @@ if ~exist('opt', 'var') || isempty(opt)
 end
 pixStep = opt.pixStep;
 
-X0      = Trials.Properties.UserData.ShapeContainerRect(1);
-Y0      = Trials.Properties.UserData.ShapeContainerRect(2);
-X1      = Trials.Properties.UserData.ShapeContainerRect(3);
-Y1      = Trials.Properties.UserData.ShapeContainerRect(4);
+X0      = ProtoTable.Properties.UserData.ShapeContainerRect(1);
+Y0      = ProtoTable.Properties.UserData.ShapeContainerRect(2);
+X1      = ProtoTable.Properties.UserData.ShapeContainerRect(3);
+Y1      = ProtoTable.Properties.UserData.ShapeContainerRect(4);
 Xm      = mean([X0, X1]);
 Ym      = mean([Y0, Y1]);
 
 if nproc==1
     x_toPix2Pix = X0:pixStep:X1;
     y_toPix2Pix = Y0:pixStep:Y1;    
-    CosineMap   = compute_cosine_map_singleWorker(Trials, alphavalue, x_toPix2Pix, y_toPix2Pix);
+    csm   = compute_cosine_map_singleWorker(ProtoTable, alphavalue, x_toPix2Pix, y_toPix2Pix);
     
 else
         
-    if isnumeric(unique(Trials.ParticipantID))
-        clc;fprintf('Computing cosine map for subject %d using %d processors...', unique(Trials.ParticipantID),  nproc);
+    if isnumeric(unique(ProtoTable.ParticipantID))
+        clc;fprintf('Computing cosine map for subject %d using %d processors...', unique(ProtoTable.ParticipantID),  nproc);
     else
         clc;fprintf('Computing cosine map for the group using %d processors...',  nproc);
     end
@@ -112,11 +112,11 @@ else
     
     x_toPix2Pix{4} = floor(Xm+1:X1);
     y_toPix2Pix{4} = floor(Ym+1:Y1);
-%     CosineMap       = compute_cosine_map_singleWorker(Trials, alphavalue, x_toPix2Pix{4}, y_toPix2Pix{4});
+%     csm       = compute_cosine_map_singleWorker(ProtoTable, alphavalue, x_toPix2Pix{4}, y_toPix2Pix{4});
     
-    sub_Trials = cell(nproc, 1);
+    sub_ProtoTable = cell(nproc, 1);
     parfor p=1:nproc        
-        sub_Trials{p} = compute_cosine_map_singleWorker(Trials, alphavalue, x_toPix2Pix{p}, y_toPix2Pix{p}, 0);
+        sub_ProtoTable{p} = compute_cosine_map_singleWorker(ProtoTable, alphavalue, x_toPix2Pix{p}, y_toPix2Pix{p}, 0);
         fprintf('Processor %d of %d processor has ended. Waiting for the other ones to finish...', p, nproc);
     end
     
@@ -124,31 +124,31 @@ else
     W_SimixSubject = zeros(Y1+abs(Y0)+1, X1+abs(X0)+1);
     
     for p = 1:nproc
-        SimixSubject = SimixSubject + sub_Trials{p}.SimixSubject;
-        W_SimixSubject = W_SimixSubject + sub_Trials{p}.W_SimixSubject;
+        SimixSubject = SimixSubject + sub_ProtoTable{p}.SimixSubject;
+        W_SimixSubject = W_SimixSubject + sub_ProtoTable{p}.W_SimixSubject;
     end
-    CosineMap.SimixSubject      = SimixSubject;
-    CosineMap.W_SimixSubject    = W_SimixSubject;
+    csm.SimixSubject      = SimixSubject;
+    csm.W_SimixSubject    = W_SimixSubject;
 
     fprintf('Done\n');
 end
 
-function CosineMap = compute_cosine_map_singleWorker(Trials, alphavalue, x_toPix2Pix, y_toPix2Pix, showProgress)
+function csm = compute_cosine_map_singleWorker(ProtoTable, alphavalue, x_toPix2Pix, y_toPix2Pix, showProgress)
 
 if nargin<5; showProgress=1;end
 
-ActDots                 = Trials.ActualDots_xy;
-RespDots                = Trials.ResponseDots_xy;
+ActDots                 = ProtoTable.ActualDots_xy;
+RespDots                = ProtoTable.ResponseDots_xy;
 
 idx_nan = any(isnan(RespDots),2);
 ActDots(idx_nan,:)=[];
 RespDots(idx_nan,:)=[];
 
 
-X0                      = Trials.Properties.UserData.ShapeContainerRect(1);
-Y0                      = Trials.Properties.UserData.ShapeContainerRect(2);
-FigureWidth             = Trials.Properties.UserData.ShapeContainerRect(3);
-FigureHeight            = Trials.Properties.UserData.ShapeContainerRect(4);
+X0                      = ProtoTable.Properties.UserData.ShapeContainerRect(1);
+Y0                      = ProtoTable.Properties.UserData.ShapeContainerRect(2);
+FigureWidth             = ProtoTable.Properties.UserData.ShapeContainerRect(3);
+FigureHeight            = ProtoTable.Properties.UserData.ShapeContainerRect(4);
 
 figure_size             = [FigureHeight+abs(Y0)+1 FigureWidth+abs(X0)+1];
 
@@ -170,12 +170,12 @@ npixels                 = FigureHeight*FigureWidth;
 
 n_tot_length            = round((FigureHeight*FigureWidth)/round(npixels/10))+1;
 
-if isnumeric(unique(Trials.ParticipantID))
-    progress        = sprintf('Computing cosine similarity index map for subject %d: [', unique(Trials.ParticipantID));
+if isnumeric(unique(ProtoTable.ParticipantID))
+    progress            = sprintf('Computing cosine similarity index map for subject %d: [', unique(ProtoTable.ParticipantID));
 else
-    progress        = sprintf('Computing cosine similarity index map for group: [');
+    progress            = sprintf('Computing cosine similarity index map for group: [');
 end
-progress        = [progress repmat('.', 1, n_tot_length+1) ']'];
+progress                = [progress repmat('.', 1, n_tot_length+1) ']'];
 if showProgress;fprintf('%s', progress);end
 k = 1;
 p = strfind(progress, '[')+1;
@@ -225,5 +225,5 @@ end
 
 fprintf('\n');
 
-CosineMap.SimixSubject      = SimixSubject;
-CosineMap.W_SimixSubject    = W_SimixSubject;
+csm.SimixSubject      = SimixSubject;
+csm.W_SimixSubject    = W_SimixSubject;

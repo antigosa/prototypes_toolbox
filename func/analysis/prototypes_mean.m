@@ -1,4 +1,9 @@
 function DataStat = prototypes_mean(Data)
+% function DataStat = prototypes_mean(Data)
+%
+% Data can be:
+% - a ProtoTable
+% - a csm (i.e. a 'cosine similarity map' structure)
 
 if istable(Data)
     DataStat = prototypes_mean_Responses(Data, {'DotID'});

@@ -1,32 +1,32 @@
-function Trials=prototypes_compute_cosineDot(Trials, CosineMap, dataType)
-% function T=prototypes_compute_cosineDot(T, dataType)
+function ProtoTable=prototypes_compute_cosineDot(ProtoTable, csm, dataType)
+% function ProtoTable=prototypes_compute_cosineDot(ProtoTable, csm, dataType)
 
 if ~exist('dataType', 'var')
     dataType = 'W_SimixSubject';
 end
 
-subjlist = unique(Trials.ParticipantID);
+subjlist = unique(ProtoTable.ParticipantID);
 
 if ischar(subjlist) && strcmp(subjlist, 'group')
-    Trials = prototypes_compute_cosineDot_asubj(Trials, CSI_map);
+    ProtoTable = prototypes_compute_cosineDot_asubj(ProtoTable, CSI_map);
 else
     nsubj = length(subjlist);
     T_new = table;
     for s = 1:nsubj
         ParticipantID = subjlist(s);
-        if ~ismember(ParticipantID, unique(CosineMap.ParticipantID))
+        if ~ismember(ParticipantID, unique(csm.ParticipantID))
             warning('This subject is not part of this group');
             return;
         end
-        CSI_map = CosineMap.(dataType)(:, :, CosineMap.ParticipantID==ParticipantID);
-        T_subj  = Trials(Trials.ParticipantID==ParticipantID, :);
+        CSI_map = csm.(dataType)(:, :, csm.ParticipantID==ParticipantID);
+        T_subj  = ProtoTable(ProtoTable.ParticipantID==ParticipantID, :);
         
         T_subj = prototypes_compute_cosineDot_asubj(T_subj, CSI_map);
         
         T_new = [T_new; T_subj];
     end
-    T_new.Properties.UserData=Trials.Properties.UserData;
-    Trials=T_new;
+    T_new.Properties.UserData=ProtoTable.Properties.UserData;
+    ProtoTable=T_new;
 end
 
 

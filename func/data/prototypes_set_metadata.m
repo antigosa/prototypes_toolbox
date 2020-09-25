@@ -1,13 +1,13 @@
-function T = prototypes_set_metadata(T, k, v)
-% function T = prototypes_set_metadata(T, k, v)
+function ProtoTable = prototypes_set_metadata(ProtoTable, k, v)
+% function ProtoTable = prototypes_set_metadata(ProtoTable, k, v)
 %
-% T is a prototable
+% ProtoTable is a prototable
 %
-% Typical metadata (EXAMPLE)
+% ProtoTableypical metadata (EXAMPLE)
 % ===================
 % 	User Data:
 % ===================
-%   StimulusType: 'body_top'
+%   StimulusProtoTableype: 'body_top'
 %   StimulusImg: [1×1 struct]
 %   Rectangle: [0 0 800 800]
 %   folder_output: 'D:\Projects\2018\Protoperispace\Analysis\Reports\20190206'
@@ -31,7 +31,7 @@ fn_ok       = {
     'Experiment', ...
     'ShapeRect', ...
     'StimulusFileName', ...
-    'StimulusType',...
+    'StimulusProtoTableype',...
     'FileName', ...
     'FolderName', ...
     'ScreenRect', ...
@@ -70,9 +70,9 @@ if ~ismember(fn_ok, k)
     return
 end
 
-T.Properties.UserData.(k) = v;
+ProtoTable.Properties.UserData.(k) = v;
 
 if strcmp(k, 'Rectangle')
-    T.Properties.UserData.RectWidth = v(3);
-    T.Properties.UserData.RectHeight = v(4);    
+    ProtoTable.Properties.UserData.RectWidth = v(3);
+    ProtoTable.Properties.UserData.RectHeight = v(4);    
 end
