@@ -1,3 +1,6 @@
+%% tutorial04_CompareAlphas.m
+
+
 %% setup
 clear; close all;
 addpath(genpath('..\..\..\prototypes_toolbox'))
@@ -27,7 +30,11 @@ SubjectsData = SubjectsData(SubjectsData.ParticipantID == 1, :);
 SubjectsData = prototypes_compute_errorVectors(SubjectsData);
 
 
-%% 
+%% Alpha level
+
+%% compute cosine maps
+% Use several alpha levels
+
 alphavalues             = [5 10 25 50];
 
 nproc                   = 4;
@@ -36,11 +43,21 @@ for a = 1:length(alphavalues)
     SubjectsCosineMaps{a}      = prototypes_compute_cosineMap(SubjectsData, alphavalues(a), nproc);
 end
 
+%% Plot without weighting
 
 figure('Position', [680 641 1060 337]); 
 for a = 1:length(alphavalues)
     subplot(2, 2, a);
-    prototypes_plot_cosineMap(SubjectsCosineMaps{a}, 1);
+    prototypes_plot_cosineMap(SubjectsCosineMaps{a}, 1, [-0.5 0.5], 'SimixSubject');
+    hold on; prototypes_plot_errorVectors(SubjectsData, 1);
+    title(sprintf('alpha %d', alphavalues(a)));
+end
+
+%% Plot with weighting
+figure('Position', [680 641 1060 337]); 
+for a = 1:length(alphavalues)
+    subplot(2, 2, a);
+    prototypes_plot_cosineMap(SubjectsCosineMaps{a}, 1, [-0.5 0.5], 'W_SimixSubject');
     hold on; prototypes_plot_errorVectors(SubjectsData, 1);
     title(sprintf('alpha %d', alphavalues(a)));
 end

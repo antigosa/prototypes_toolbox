@@ -823,3 +823,29 @@ SubjectsDataB.CategoryPrototypes = [];
 figure; prototypes_plot_dots(SubjectsDataB)
 
 save('PrototypesData_2Conditions', 'SubjectsDataA', 'SubjectsDataB');
+
+
+%% test 17 - data around object
+clear;
+close all;
+SubjectsData = prototypes_synthetic_DS;
+
+% compute error vectors
+SubjectsData = prototypes_compute_errorVectors(SubjectsData);
+
+figure('Position', [827 310 819 632]);
+
+% plot data for each participant
+nsubj = length(unique(SubjectsData.ParticipantID));
+for s = 1:nsubj
+    subplot(1, 2, s);
+        
+    % plot the actual dots and the responses
+    prototypes_plot_dots(SubjectsData, s);
+    
+    % plot the error vectors
+    hold on;prototypes_plot_errorVectors(SubjectsData, s);
+    title(sprintf('Participant %d', s));
+end
+
+save('PrototypesData_AroundObjects', 'SubjectsData');

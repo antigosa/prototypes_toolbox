@@ -1,4 +1,4 @@
-%% tutorial01_CosineMaps_Square.m
+%% tutorial03_CosineMaps_2Conditions.m
 % This tutorial shows the basic usage of the prototypes_toolbox. I will be
 % using a simulated dataset to compute the cosine similarity index maps of
 % individual participants and to fit the data with a categorical adjustment

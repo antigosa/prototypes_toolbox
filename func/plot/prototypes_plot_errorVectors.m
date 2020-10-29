@@ -30,10 +30,12 @@ q.LineWidth     = 1;
 axis off;axis equal;
 axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
 rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
-if strcmp(prototypes_get_metadata(ProtoTable, 'StimulusType'), 'Circle')
-    rectangle('Position', rectPos, 'Curvature', 1);
-else
-    rectangle('Position', rectPos);
+switch prototypes_get_metadata(ProtoTable, 'StimulusType')
+    case 'Circle'
+        rectangle('Position', rectPos, 'Curvature', 1);
+        
+    case {'Square', 'Rectangle'}
+        rectangle('Position', rectPos);
 end
 ax              = gca;
 ax.YDir         = prototypes_get_metadata(ProtoTable, 'YDir');

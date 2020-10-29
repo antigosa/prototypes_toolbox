@@ -28,7 +28,7 @@ ProtoTable = prototypes_set_metadata(ProtoTable, 'YDir', 'normal');             
 ProtoTable = prototypes_set_metadata(ProtoTable, 'Experiment', '');
 
 % ProtoTablehe type of stimulus (e.g. 'Circle', 'Rectangle', 'Body', 'Hand')
-ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusProtoTableype', '');
+ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusType', '');
 
 % ProtoTablehe filename of the stimulus image
 ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusFileName', '');
