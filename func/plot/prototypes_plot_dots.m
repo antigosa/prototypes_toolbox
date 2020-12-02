@@ -1,10 +1,13 @@
-function prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
+function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
 % function prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
-    prototypes_plot_image(ProtoTable)
+        ax_img = prototypes_plot_image(ProtoTable);
+else
+    ax_img=[];
 end
+ax=axes;
 
 if ~exist('whichSpace', 'var')||isempty(whichSpace); whichSpace='cart'; end
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
@@ -39,12 +42,16 @@ switch whichSpace
             case {'Square', 'Rectangle'}
                 rectangle('Position', rectPos);
         end
-        ax          = gca;
+%         ax          = gca;
         ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
         
         if strcmp(ParticipantID, 'group')
             ax.Units    = 'normalized';
             ax.Position = [0.05 0.05 0.82 0.9];
+            if ~isempty(ax_img)
+                ax_img.Units = ax.Units;
+                ax_img.Position = ax.Position;
+            end
         end
         
         % fig         = gcf;

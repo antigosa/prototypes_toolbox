@@ -1,10 +1,11 @@
-function prototypes_plot_errorVectors(ProtoTable, ParticipantID)
+function ax=prototypes_plot_errorVectors(ProtoTable, ParticipantID)
 % function prototypes_plot_errorVectors(ProtoTable, ParticipantID)
 % dataType: 'ActDots' | 'RespDots'
 
-% if exist('prototypes_plot_image.m', 'file') ~= 0
-%     prototypes_plot_image(ProtoTable)
-% end
+if exist('prototypes_plot_image.m', 'file') ~= 0
+     ax_img = prototypes_plot_image(ProtoTable);  
+end
+ax=axes;
 
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
 
@@ -37,11 +38,15 @@ switch prototypes_get_metadata(ProtoTable, 'StimulusType')
     case {'Square', 'Rectangle'}
         rectangle('Position', rectPos);
 end
-ax              = gca;
+% ax              = gca;
 ax.YDir         = prototypes_get_metadata(ProtoTable, 'YDir');
 if strcmp(ParticipantID, 'group')
     ax.Units        = 'normalized';
     ax.Position     = [0.05 0.05 0.82 0.9];
+    if ~isempty(ax_img)
+        ax_img.Units = ax.Units;
+        ax_img.Position = ax.Position;
+    end
 end
 
 % fig         = gcf;
