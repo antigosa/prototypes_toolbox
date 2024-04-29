@@ -23,14 +23,14 @@ configure_random_number_generator;
 % prepare the output folder and the output filename
 % =========================================================================
 folder_subject  = subjInfo.folder; %   fullfile(project_path, 'results', sprintf('sub%02d', subjNum));
-fname = make_subject_file(folder_subject, subjNum);
+fname           = make_subject_file(folder_subject, subjNum);
 
 
 % =========================================================================
 % START THE GENERATION OF THE TRIAL SEQUENCE
 % =========================================================================
 fprintf('\n========================================================================================\n');
-fprintf('generating the trial sequence for subject %d...', subjNum);
+fprintf('generating the trial sequence for subject %s...', subjNum);
 
 % =========================================================================
 % dot positions
@@ -127,10 +127,11 @@ quadrant_sequence_pract     = cellstr(repmat('all_screen', size(xy_practice,1), 
 ActualDots_xy_blocks = horzcat({'practise';xy_practice}, ActualDots_xy_blocks);
 trials_id           = vertcat(zeros(size(xy_practice,1),1), trials_id);
 blocks_id           = vertcat(zeros(size(xy_practice,1),1), blocks_id);
-subj_id             = ones(length(blocks_id), 1)*subjInfo.subjNum;
+% subj_id             = ones(length(blocks_id), 1)*subjInfo.subjNum;
+subj_id             = repmat({subjInfo.subjNum}, length(blocks_id), 1);
 age                 = repmat(subjInfo.Age, length(blocks_id), 1);
-gender              = repmat(subjInfo.Gender, length(blocks_id), 1);
-hand_preference     = repmat(subjInfo.HandPref, length(blocks_id), 1);
+gender              = repmat({subjInfo.Gender}, length(blocks_id), 1);
+hand_preference     = repmat({subjInfo.HandPref}, length(blocks_id), 1);
 ActualDots_xy       = vertcat(ActualDots_xy_blocks{2,:});
 run_fast            = repmat(run_fast, length(blocks_id), 1);
 run_test            = repmat(run_test, length(blocks_id), 1);

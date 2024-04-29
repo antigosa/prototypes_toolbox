@@ -4,13 +4,13 @@ function [Trials, actual_timing_table] = prototypes_show_oneTrial(Trials, this_t
 %% get the parameters
 param_show_oneTrial = exp_param.param_show_oneTrial;
 
-ExpPar              = this_trial.Properties.UserData.ExpPar;
+% ExpPar              = this_trial.Properties.UserData.ExpPar;
 
 % get the positions of the dots for this trial
 ActualDots_xy       = this_trial.ActualDots_xy;
 
 % get the subject
-subject_id          = this_trial.subj_id;
+subject_id          = this_trial.subj_id{1};
 
 % get the block
 block_id            = this_trial.blocks_id;
@@ -19,10 +19,10 @@ block_id            = this_trial.blocks_id;
 break_id            = this_trial.breaks_id;
 
 % get the nblocks
-nblocks             = ExpPar.nblocks;
+nblocks             = param_show_oneTrial.nblocks;
 
 % get the trial
-trial_id            = this_trial.trial_id;
+trial_id            = this_trial.trials_id;
 
 % % get the shape/image dimensions
 % RectHeight          = this_trial.RectHeight;
@@ -32,10 +32,10 @@ trial_id            = this_trial.trial_id;
 rectangle_color     = this_trial.RectCol; %[36 36 36];
 
 % choose the color of the rectangle
-target_color        = this_trial.TargetCol; 
+target_color        = this_trial.target_color;
 
 % define the rotation angles of the figure when presented the second time
-rotationAngle      = this_trial.RotAngle; %-90:10:90;
+rotationAngle      = this_trial.rotAngle; %-90:10:90;
 
 % get the window
 win = exp_param.Screen.win;
@@ -152,14 +152,14 @@ actual_timing.black_onset = Screen('Flip', win, actual_timing.dot_onset+timing.d
 
 % show SECOND Figure
 if useImage
-%     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
+    %     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
     prototypes_prepare_image(win, rectangle_color, im_text_idx, Rectcoord_SECOND, rotationAngle)
 else
     prototypes_prepare_shape(win, rectangle_color, Rectcoord_SECOND);
 end
 
 if runTest
-%     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
+    %     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
     prototypes_prepare_target(win, ActualDots_xy, target_color, Rectcoord_SECOND, rotationAngle)
 end
 actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+timing.blank);
@@ -176,9 +176,10 @@ ShowCursor(mouse_type);
 if runFast
     
     % this is just for testing
-    xy = prototypes_rotate_dots(ActualDots_xy, rotationAngle)+random('norm', 0, 10, 2, 1);                  % TEST
+    % ADDED [0, 0], I CANNOT REMEMBER WHAT TO ADD THERE
+    xy = prototypes_rotate_dots(ActualDots_xy, rotationAngle, [0, 0])+random('norm', 0, 10, 2, 1);                  % TEST
     mouse_resp.x_mouse_resp = xy(1)+ Rectcoord_SECOND(1); % TEST
-    mouse_resp.y_mouse_resp = xy(2)+ Rectcoord_SECOND(2); % TEST   
+    mouse_resp.y_mouse_resp = xy(2)+ Rectcoord_SECOND(2); % TEST
 else
     
     % if the second parameter is empty, it means that participants can click anywhere
@@ -198,7 +199,7 @@ dot_onset                   = actual_timing.dot_onset - actual_timing.trial_star
 blank_onset                 = actual_timing.black_onset - actual_timing.trial_start;
 ev2_onset                   = actual_timing.rectangle2_onset - actual_timing.trial_start;
 RespDots_xy_relToShape      = resp - Rectcoord_SECOND([1 2]);
-RespDots_xy  = prototypes_rotate_dots(RespDots_xy_relToShape, rotationAngle);
+RespDots_xy                 = prototypes_rotate_dots(RespDots_xy_relToShape, rotationAngle, [0 0]); % UPDATE [0, 0], OR IT'S GOING TO BE VERY WRONG!!
 RespDots_xy_relToScreen(1)  = resp(:,1) + Rectcoord_SECOND(1);
 RespDots_xy_relToScreen(2)  = resp(:,2) + Rectcoord_SECOND(2);
 if size(RespDots_xy, 1)~=1; RespDots_xy=RespDots_xy';end
@@ -217,8 +218,10 @@ this_trial = [this_trial, ...
 %     screen_rect, MouseInitialLoc, experiment_start, trial_start, ev1_onset, dot_onset, blank_onset, ev2_onset, ...
 %     useImage, mouse_type);
 
- Trials = prototypes_store_atrial(Trials, this_trial);
+Trials = prototypes_store_atrial(Trials, this_trial);
 
-save (sprintf('sub%02d_actual_timing.mat', subject_id), 'actual_timing_table');
-save (sprintf('sub%02d_mouse_track.mat', subject_id), 'mouse_resp');
-save (sprintf('sub%02d_Resp_backup.mat', subject_id), 'Trials');
+
+% ADD OUTPUT FOLDER HERE!!
+save (sprintf('%s_actual_timing.mat', subject_id), 'actual_timing_table');
+save (sprintf('%s_mouse_track.mat', subject_id), 'mouse_resp');
+save (sprintf('%s_Resp_backup.mat', subject_id), 'Trials');

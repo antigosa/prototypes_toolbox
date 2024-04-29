@@ -6,7 +6,7 @@ addpath(genpath(fullfile(toolbox_dir, 'prototypes_toolbox')));
 addpath(genpath(fullfile(toolbox_dir, 'ptb_utils')));
 
 % if you want run a test runFast = 1;
-runFast             = 0;
+runFast             = 1;
 runTest             = 1;
 showImageInCenter   = 0;
 useImage            = 0;
@@ -149,7 +149,7 @@ exp_param.day                                   = date;
 formatOut                                       = 'yyyymmdd';daystr=datestr(now,formatOut);
 formatOut                                       = 'HHMM';timestr=datestr(now,formatOut);
 Trials.Properties.UserData.folder_output        = subjInfo.folder; % fullfile(project_dir, 'results', sprintf('sub%02d', unique(Trials.subj_id)));
-Trials.Properties.UserData.fname_output         = sprintf('res_%s_nDots%d_%s_%s', cell2mat(unique(Trials.subj_id)), nDots, daystr, timestr);
+Trials.Properties.UserData.fname_output         = sprintf('res_%s_nDots%d_%s_%s', cell2unique(Trials.subj_id), nDots, daystr, timestr);
 Trials.Properties.UserData.fname_TrialList      = fname_TrialList;
 Trials.Properties.UserData.experiment_dur_sec   = experiment_dur;
 Trials.Properties.UserData.day                  = date;
@@ -187,10 +187,10 @@ fprintf('the experiment lasted %d hour and %d min\n', hr, mi);
 % 
 
 %% compute_cosine similarity
-% alphavalue = 10;
-% Trials = prototypes_compute_cosine_map(Trials, alphavalue);
-% prototypes_save_data(Trials);
-% figure; prototypes_plot_cosineMap(Trials)
-% prototypes_save_plot('SimMap', Trials, exp_param);
-% 
-% 
+alphavalue = 10;
+Trials = prototypes_compute_cosine_map(Trials, alphavalue);
+prototypes_save_data(Trials);
+figure; prototypes_plot_cosineMap(Trials)
+prototypes_save_plot('SimMap', Trials, exp_param);
+
+
