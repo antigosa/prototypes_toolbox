@@ -1,22 +1,27 @@
-function xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
+function xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
+% function xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
+
+if nargin==7
+    use_seed='shuffle';
+end
 
 shape_width     = ShapeRect(1);
 shape_height    = ShapeRect(2);
 
 switch Shape
     case 'Circle'
-        xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise);
+        xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed);
         
     case 'Rectangle'
-        xy = prototypes_generate_grid_Rectangle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise);
+        xy = prototypes_generate_grid_Rectangle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed);
                 
 %     case 'Image'
 %         xy = prototypes_generate_grid_withImage(img, mask, n_dots_x, n_dots_y, grid_offset);
 end
 
 
-function xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
-% function prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
+function xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
+% function prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
 % it generates a mat file with the xy coordinates
 %
 %
@@ -53,7 +58,8 @@ function xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_
 close all;
 
 % be sure that the randomization is fine
-rng('shuffle');
+% rng('shuffle');
+rng(use_seed); % it should be 'shuffle';
 
 
 % =========================================================================

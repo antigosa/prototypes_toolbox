@@ -58,8 +58,10 @@ switch prototypes_get_metadata(csm, 'StimulusType')
 end
 
 ax.YDir         = prototypes_get_metadata(csm, 'YDir');
-cb_im = colorbar(ax_img);
-cb_im.Visible='Off';
+if ~isempty(ax_img)
+    cb_im = colorbar(ax_img);
+    cb_im.Visible='Off';
+end
 
 cb              = colorbar(ax);
 cb.Limits       = [clim(1) clim(2)]-zoffset;

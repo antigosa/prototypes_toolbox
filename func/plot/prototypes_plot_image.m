@@ -1,6 +1,6 @@
 function ax=prototypes_plot_image(Trials)
 % IMAGE MUST HAVE ALPHA CHANNEL
-if isfield(Trials.Properties.UserData, 'StimulusFileName')
+if isfield(Trials.Properties.UserData, 'StimulusFileName')&~isempty(Trials.Properties.UserData.StimulusFileName)
     
     if ischar(Trials.Properties.UserData.StimulusFileName)
         [img, ~, transparency] = imread(Trials.Properties.UserData.StimulusFileName);

@@ -56,6 +56,8 @@ end
 alphavalue              = 10;
 nproc                   = 4;
 SubjectsCosineMaps      = prototypes_compute_cosineMap(SubjectsData, alphavalue, nproc);
+save('PrototypesData_Rectangle.mat', 'SubjectsData', 'SubjectsCosineMaps')
+
 
 %% Plot cosine maps
 % plot data for each participant
