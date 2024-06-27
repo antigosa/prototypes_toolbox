@@ -43,12 +43,22 @@ win = exp_param.Screen.win;
 % get the screen rect
 screen_rect = exp_param.Screen.rect;
 
+% get mouse rect
+% mouse_rect = exp_param.Screen.mouse_rect;
+
+randomiseMousLoc = exp_param.Mouse.randomiseMouseLoc;
+
 % get the timing
 timing = exp_param.param_show_oneTrial.timing;
 
 % get the stimulus type
 stimulusType    = exp_param.metadata.stimulusType;
 useImage        = exp_param.metadata.useImage;
+
+% screen center
+screen_center   = exp_param.Screen.screen_center;
+xCenter         = screen_center(1);
+yCenter         = screen_center(2);
 
 
 % get the mouse type
@@ -109,9 +119,28 @@ end
 % =========================================================================
 % show the message at the end of the block
 % =========================================================================
-if break_id ~= 0 && ~runFast
-    Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, sprintf('End of Block %d (out of %d)\n\nPlease take a rest\n\nPress the bar when you feel ready to start.', break_id, nblocks), 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
-    KbWait;WaitSecs(1);
+if trial_id ~= 1
+    if break_id == 1 && ~runFast
+        Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, sprintf('End of Block %d (out of %d)\n\nPlease take a rest\n\nPress the bar when you feel ready to start.', break_id, nblocks), 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
+        KbWait;WaitSecs(1);
+    end
+    
+    if break_id == 2 && ~runFast
+        Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, sprintf('Please take a rest\n\nPress the bar when you feel ready to start.'), 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
+        KbWait;WaitSecs(1);
+    end
+    
+end
+if any(ismember(this_trial.Properties.VariableNames, 'GVS'))
+    if this_trial.GVS ~= -1 && this_trial.breaks_id ~= 0
+        
+        GVS_code = this_trial.GVS;
+        
+        port = 'COM3';
+        
+        %Test Left
+        SendGVSTrigger(GVS_code, port)
+    end
 end
 
 
@@ -168,7 +197,20 @@ actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+t
 % EVENT 5: RESPONSE
 % =========================================================================
 % The mouse ap
-MouseInitialLoc=[round(rand(1)*screen_rect(3)) round(rand(1)*screen_rect(4))];
+% MouseInitialLoc=[round(rand(1)*screen_rect(3)) round(rand(1)*screen_rect(4))];
+% MouseInitialLoc=[round(rand(1)*mouse_rect(3)) round(rand(1)*mouse_rect(4))];
+MouseInitialLoc=[xCenter yCenter];
+
+if randomiseMousLoc
+    
+    theta   = deg2rad(random('unid', 360, 1,1));
+    % theta                   = deg2rad([0 180]);
+    % rho                     = 75;
+    rho     = random('unid', 15, 1,1);
+    [x0_offset, y0_offset] = pol2cart(theta, rho);
+    MouseInitialLoc=[MouseInitialLoc(1)+x0_offset MouseInitialLoc(2)+y0_offset];
+end
+
 SetMouse(MouseInitialLoc(1),MouseInitialLoc(2));
 
 %Collect Response
@@ -185,8 +227,24 @@ else
     % if the second parameter is empty, it means that participants can click anywhere
     [~, mouse_resp.x_mouse_resp,mouse_resp.y_mouse_resp] = ptb_getMouseResponse_withTracking(win, Rectcoord_SECOND); % Rectcoord_SECOND
 end
+
+% response_relToTrialStart = GetSecs-actual_timing.trial_start;
+
 resp(1) = mouse_resp.x_mouse_resp(end);
 resp(2) = mouse_resp.y_mouse_resp(end);
+
+
+%% Wait after response
+% CHECK THIS!!!!!
+Trial_dur = 6;
+
+TimeLeft = Trial_dur-(GetSecs-actual_timing.trial_start);
+
+% Wait until 6 secs
+while TimeLeft>0
+    TimeLeft = Trial_dur-(GetSecs-actual_timing.trial_start);
+%     disp(TimeLeft)
+end
 
 
 %% post trial
@@ -198,18 +256,19 @@ ev1_onset                   = actual_timing.rectangle1_onset - actual_timing.tri
 dot_onset                   = actual_timing.dot_onset - actual_timing.trial_start;
 blank_onset                 = actual_timing.black_onset - actual_timing.trial_start;
 ev2_onset                   = actual_timing.rectangle2_onset - actual_timing.trial_start;
+trial_end                   = GetSecs-actual_timing.trial_start;
 RespDots_xy_relToShape      = resp - Rectcoord_SECOND([1 2]);
 RespDots_xy                 = prototypes_rotate_dots(RespDots_xy_relToShape, rotationAngle, [0 0]); % UPDATE [0, 0], OR IT'S GOING TO BE VERY WRONG!!
 RespDots_xy_relToScreen(1)  = resp(:,1) + Rectcoord_SECOND(1);
 RespDots_xy_relToScreen(2)  = resp(:,2) + Rectcoord_SECOND(2);
 if size(RespDots_xy, 1)~=1; RespDots_xy=RespDots_xy';end
-errorXY                 = RespDots_xy - ActualDots_xy;
-errorMag                = sqrt(diag(errorXY * errorXY'));
+errorXY                     = RespDots_xy - ActualDots_xy;
+errorMag                    = sqrt(diag(errorXY * errorXY'));
 
 
 this_trial = [this_trial, ...
     table(RespDots_xy_relToShape, RespDots_xy, RespDots_xy_relToScreen, ...
-    errorXY, errorMag, screen_rect, MouseInitialLoc, experiment_start, trial_start, ev1_onset, dot_onset, blank_onset, ev2_onset)
+    errorXY, errorMag, screen_rect, MouseInitialLoc, experiment_start, trial_start, trial_end, ev1_onset, dot_onset, blank_onset, ev2_onset)
     ];
 
 % this_trial = table(subject_id, trial_id, ActualDots_xy, block_id, break_id, stimulusType, Rectcoord_FIRST, Rectcoord_SECOND, ...

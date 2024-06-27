@@ -1,4 +1,5 @@
-addpath(genpath('D:\Programs\toolbox\prototypes_toolbox'))
+%addpath(genpath('D:\Programs\toolbox\prototypes_toolbox'))
+addpath(genpath('C:\Users\mlungo\Desktop\Testing\Raffa\PrototypesTiltedHead_GVS\Program'))
 
 
 %% test 1 - test prototypes_synthetic_simpleDS

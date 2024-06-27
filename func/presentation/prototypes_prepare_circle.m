@@ -1,9 +1,10 @@
-  function prototypes_prepare_circle(win, col, Rectcoord)
+function prototypes_prepare_circle(win, col, Rectcoord)
 % function prototypes_prepare_circle(win, col, Rectcoord)
 % col = [36 36 36]
 
-whichScreen = 2 ;
+
 if nargin==0
+    whichScreen = 0 ;
     [fname,file_path] = uigetfile({'*.mat';}, 'Choose the dots');
     %     load('TrialList_grid300_offset 8.mat')
     load(fullfile(file_path, fname));
@@ -11,10 +12,7 @@ if nargin==0
 end
 
 Screen('FillOval', win, col, Rectcoord)
-if nargin==0
-    
-    
-    
+if nargin==0            
     n_dots = size(xy, 1);
     for d = 1:n_dots
         Screen('DrawDots', win, xy (d,:),10,[256 256 256],[Rectcoord(1) Rectcoord(2)],2);

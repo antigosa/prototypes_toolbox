@@ -17,9 +17,15 @@ if runFast
     
 else
     % this is the real timing
+%     timing.ITI_duration     = 1;
+%     timing.rect1_duration   = 0.1;
+%     timing.dot_duration     = 0.4;
+%     timing.blank            = 1;
+%     timing.locate_dots      = 2;
+
     timing.ITI_duration     = 1;
-    timing.rect1_duration   = 0.1;
-    timing.dot_duration     = 0.4;
+    timing.rect1_duration   = 1;
+    timing.dot_duration     = 1;
     timing.blank            = 1;
     timing.locate_dots      = 2;
     
