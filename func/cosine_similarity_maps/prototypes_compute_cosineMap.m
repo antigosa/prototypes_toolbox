@@ -55,7 +55,7 @@ csm_subj = cell(1, nsubj);
 for s = 1:nsubj
     subjNum = subjlist(s);
     %ProtoTable_subj{s} = prototypes_select_subjects(ProtoTable, subjNum);
-    Trial_subj = ProtoTable(ProtoTable.ParticipantID==subjNum, :);
+    Trial_subj = ProtoTable(ismember(ProtoTable.ParticipantID,subjNum), :);
     csm_subj{s} = prototypes_compute_cosineMap_aSubj(Trial_subj, alphavalue, nproc, opt);
     
     if s == 1

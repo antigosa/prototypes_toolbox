@@ -13,7 +13,7 @@ assert(any(strcmp(ProtoTable.Properties.VariableNames, 'ActualDots_xy')), ...
     'ActualDots_xy needed to compute error vectors');
 
 assert(any(strcmp(ProtoTable.Properties.VariableNames, 'ResponseDots_xy')), ...
-    'RespDots_xy needed to compute error vectors');
+    'ResponseDots_xy needed to compute error vectors');
 
 % compute the error vector (coordinates)
 ProtoTable.errorXY      = ProtoTable.ResponseDots_xy - ProtoTable.ActualDots_xy;

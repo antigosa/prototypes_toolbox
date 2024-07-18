@@ -87,7 +87,7 @@ if any(strcmp(ProtoTable.Properties.VariableNames, 'errorXY'))
     tmp = ProtoTable(~any(isnan(ProtoTable.errorXY),2),:);
     
     % check error vectors
-    assert(isequal(tmp.errorXY, tmp.RespDots_xy-tmp.ActualDots_xy), 'error vectors are not consistent with the response data');
+    assert(isequal(tmp.errorXY, tmp.ResponseDots_xy-tmp.ActualDots_xy), 'error vectors are not consistent with the response data');
     
     % check error magnitude
     assert(isequal(tmp.errorMag, sqrt(diag(tmp.errorXY*tmp.errorXY'))), 'error magnitudes are not consistent with the error vectors');
@@ -125,7 +125,7 @@ end
 function proto_var = prototypes_variables
 % function proto_var=prototypes_variables
 % Variables
-proto_var.FundamentalVariables      = {'ParticipantID', 'Trial', 'ActualDots_xy', 'ResponseDots_xy'};
+proto_var.FundamentalVariables      = {'ParticipantID', 'trials_id', 'ActualDots_xy', 'ResponseDots_xy'};
 proto_var.ImportantVariables        = {'Block', 'Error_xy', 'ErrorMag', 'DotID'};
 proto_var.OptionalVariables         = {'MouseInitialLoc', 'ResponseDots_xy_relToScreen', 'ResponseDots_xy_relToShape', 'RectCoord_FIRST', 'RectCoord_SECOND'};
 

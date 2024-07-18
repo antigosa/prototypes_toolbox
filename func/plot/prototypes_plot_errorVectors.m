@@ -1,5 +1,5 @@
 function ax=prototypes_plot_errorVectors(ProtoTable, ParticipantID)
-% function prototypes_plot_errorVectors(ProtoTable, ParticipantID)
+% function ax=prototypes_plot_errorVectors(ProtoTable, ParticipantID)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
@@ -9,12 +9,23 @@ ax=axes;
 
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
 
-if ~strcmp(ParticipantID, 'group') && ~strcmp(ProtoTable.ParticipantID, 'group')
+n = length(unique(ProtoTable.ParticipantID));
+if n==1 
+    if strcmp(unique(ProtoTable.ParticipantID), 'group')
+        isgroupData = 1;
+    else
+        % it's one participant
+        isgroupData = 0;
+    end
+end
+
+
+if ~isgroupData
     if ~ismember(ParticipantID, unique(ProtoTable.ParticipantID))
         warning('This subject is not part of this group');
         return;
     end
-    ProtoTable = ProtoTable(ProtoTable.ParticipantID==ParticipantID, :);
+    ProtoTable = ProtoTable(contains(ProtoTable.ParticipantID, ParticipantID), :);
 end
 
 ActDots         = ProtoTable.ActualDots_xy;
@@ -29,14 +40,25 @@ q.LineWidth     = 1;
 % prototypes_plot_setup(ProtoTable, l);
 
 axis off;axis equal;
-axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
-rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
-switch prototypes_get_metadata(ProtoTable, 'StimulusType')
-    case 'Circle'
-        rectangle('Position', rectPos, 'Curvature', 1);
-        
-    case {'Square', 'Rectangle'}
-        rectangle('Position', rectPos);
+
+
+
+if isfield(ProtoTable.Properties.UserData, 'ShapeContainerRect')
+    axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
+end
+
+if isfield(ProtoTable.Properties.UserData, 'ShapeRect')
+    rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
+end
+
+if isfield(ProtoTable.Properties.UserData, 'StimulusType')
+    switch prototypes_get_metadata(ProtoTable, 'StimulusType')
+        case 'Circle'
+            rectangle('Position', rectPos, 'Curvature', 1);
+
+        case {'Square', 'Rectangle'}
+            rectangle('Position', rectPos);
+    end
 end
 % ax              = gca;
 ax.YDir         = prototypes_get_metadata(ProtoTable, 'YDir');

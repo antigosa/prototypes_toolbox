@@ -1,5 +1,5 @@
 function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
-% function prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
+% function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
@@ -13,12 +13,26 @@ if ~exist('whichSpace', 'var')||isempty(whichSpace); whichSpace='cart'; end
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
 if ~exist('dataType', 'var'); dataType='both'; end
 
-if ~strcmp(ParticipantID, 'group') && ~strcmp(ProtoTable.ParticipantID, 'group')
+n = length(unique(ProtoTable.ParticipantID));
+if n==1 
+    if strcmp(unique(ProtoTable.ParticipantID), 'group')
+        isgroupData = 1;
+    else
+        % it's one participant
+        isgroupData = 0;
+    end
+end
+
+
+if ~isgroupData
     if ~ismember(ParticipantID, unique(ProtoTable.ParticipantID))
         warning('This subject is not part of this group');
         return;
     end
-    ProtoTable = ProtoTable(ProtoTable.ParticipantID==ParticipantID, :);
+    
+    % select a participant
+    %ProtoTable = ProtoTable(ProtoTable.ParticipantID==ParticipantID, :);
+    ProtoTable = ProtoTable(ismember(ProtoTable.ParticipantID, ParticipantID), :);
 end
 
 switch whichSpace
@@ -75,11 +89,11 @@ ax = gca;
 ax.Units = 'Pixel';
 DotSize = ax.Position(3)/20;
 switch dataType
-    case 'ActDots'
+    case {'ActDots', 'ActualDots'}
         hold on; sh1=scatter(ActDots(:,1), ActDots(:,2), 'filled');
         sh1.MarkerFaceColor='k';
         %sh1.SizeData=20;
-    case 'RespDots'
+    case {'RespDots', 'ResponseDots'}
         hold on; sh2=scatter(RespDots(:,1), RespDots(:,2), 'filled');
         sh2.MarkerFaceColor='r';
         %sh2.SizeData=20;

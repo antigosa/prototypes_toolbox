@@ -16,8 +16,8 @@ ndotsXrow               = ndots/nrows;
 % ActualDots_xy           = prototypes_generate_grid('Rectangle', ShapeDim, ndots_x, ndots_y, multOf, grid_offset, dot_noise);
 ActualDots_xy           = prototypes_generate_grid_withImage('person_large_space.png', 'Mask_Circle.png', ndots_x, ndots_y, grid_offset);
 ProtoTable              = prototypes_synthetic_simpleDS(ActualDots_xy, ShapeDim, 0, nsubj);
-ProtoTable.Properties.UserData.StimulusType = 'Image';
-ProtoTable.Properties.UserData.StimulusFileName = 'person_large_space.png';
+ProtoTable.Properties.UserData.StimulusType         = 'Image';
+ProtoTable.Properties.UserData.StimulusFileName     = 'person_large_space.png';
 
 % set the options for the CAM model
 opt.w                   = 0.75;

@@ -12,12 +12,23 @@ if ~exist('clim', 'var')||isempty(clim); clim=[-1 1]; end
 
 if ~isfield(csm, dataType); dataType='W_CosineMap_mean';end
 
-if ~strcmp(ParticipantID, 'group') && ~strcmp(csm.ParticipantID, 'group')
+n = length(unique(csm.ParticipantID));
+if n==1 
+    if strcmp(unique(csm.ParticipantID), 'group')
+        isgroupData = 1;
+    else
+        % it's one participant
+        isgroupData = 0;
+    end
+end
+
+
+if ~isgroupData
     if ~ismember(ParticipantID, unique(csm.ParticipantID))
         warning('This subject is not part of this group');
         return;
     end
-    CSI_map = csm.(dataType)(:, :, csm.ParticipantID==ParticipantID);
+    CSI_map = csm.(dataType)(:, :, ismember(csm.ParticipantID, ParticipantID));
 else
     CSI_map = csm.(dataType);
 end
