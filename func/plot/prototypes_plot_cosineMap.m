@@ -20,6 +20,8 @@ if n==1
         % it's one participant
         isgroupData = 0;
     end
+else
+    isgroupData = 0;    
 end
 
 
@@ -33,26 +35,28 @@ else
     CSI_map = csm.(dataType);
 end
 
+idx_participant = find(ismember(csm.ParticipantID, ParticipantID));
+
 zoffset = 0;
 ydim    = size(CSI_map, 1);
 xdim    = size(CSI_map, 2);
-x       = linspace(csm.Properties.UserData.ShapeContainerRect(1),csm.Properties.UserData.ShapeContainerRect(3), xdim);
-y       = linspace(csm.Properties.UserData.ShapeContainerRect(2),csm.Properties.UserData.ShapeContainerRect(4), ydim);
+x       = linspace(csm.Properties.UserData(idx_participant).ShapeContainerRect(1),csm.Properties.UserData(idx_participant).ShapeContainerRect(3), xdim);
+y       = linspace(csm.Properties.UserData(idx_participant).ShapeContainerRect(2),csm.Properties.UserData(idx_participant).ShapeContainerRect(4), ydim);
 [X,Y]   = meshgrid(x,y);
 mesh(X, Y, CSI_map-zoffset);view(0, 90);%set(gca, 'YDir', 'reverse')
 caxis(clim-zoffset);
 % figure; imagesc(Groupcsms.W_csm_mean);
 axis off;axis equal;
-axis(csm.Properties.UserData.ShapeContainerRect([1 3 2 4]));
+axis(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 3 2 4]));
 ax              = gca;
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
-    ax_img = prototypes_plot_image(csm);        
+    ax_img = prototypes_plot_image(csm);
 else
-    ax_img=[];    
+    ax_img=[];
 end
 
-rectPos = csm.Properties.UserData.ShapeRect;
+rectPos = csm.Properties.UserData(idx_participant).ShapeRect;
 
 switch prototypes_get_metadata(csm, 'StimulusType')
     case 'Circle'
