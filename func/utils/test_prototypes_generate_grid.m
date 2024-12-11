@@ -41,3 +41,25 @@ xy = [xy; xy];
 
 save(sprintf('TrialList_imsize%dx%d_ndots%d_nblocks%d_offset%d_Circle', ...
     ShapeRect(1), ShapeRect(1), n_dots, multOf, dot_noise), 'xy', 'shape_width', 'shape_height', 'screen_width_px', 'screen_height_px');
+
+%% Generate 200 dots
+Shape           = 'Rectangle';
+ShapeRect       = [660 660]; % px
+n_dots_x        = 12;
+n_dots_y        = 12;
+multOf          = 4; % number of blocks
+grid_offset     = 30;
+dot_noise       = 8;
+
+xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise);
+
+n_dots              = size(xy, 1);
+shape_width         = ShapeRect(1);
+shape_height        = ShapeRect(2);
+screen_width_px     = 1920;
+screen_height_px    = 1080;
+
+xy = [xy; xy];
+
+save(sprintf('TrialList_imsize%dx%d_ndots%d_nblocks%d_offset%d_Rectangle', ...
+    ShapeRect(1), ShapeRect(1), n_dots, multOf, dot_noise), 'xy', 'shape_width', 'shape_height', 'screen_width_px', 'screen_height_px');

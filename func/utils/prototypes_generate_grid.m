@@ -162,12 +162,165 @@ if isMultOf>0
     fprintf('number of dots: %d\n', n_dots);
 end
 
+
 % % save
 % save(sprintf('TrialList_imsize%dx%d_ndots%d_nblocks%d_offset%d_Circle', square_dim_x, square_dim_y, n_dots, multOf, dot_noise), 'xy',...
 %     'shape_width', 'shape_height');
 
+function xy = prototypes_generate_grid_Rectangle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
+% function prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
+% it generates a mat file with the xy coordinates
+%
+%
+% =========================================================================
+% EXAMPLE CALLS
+% =========================================================================
+%
+% use default parameters (see rows 31 to 41)
+% - prototypes_generate_grid_Circle
+%
+% % create a circle 500x500 with 25 dots on the diameters
+% shape_width=500; shape_height=500; n_dots_x=25;n_dots_y=25;
+% prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y)
+%
+% % create a circle 500x500 with 25 dots on the diameters and force the
+% % number to be a multiple of 4 (for example, you want to divide
+% % presentation in 4 blocks)
+% shape_width=500; shape_height=500; n_dots_x=25;n_dots_y=25;multOf = 4;
+% prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf)
+%
+% % create a circle 500x500 with 25 dots on the diameters and force the
+% % number to be a multiple of 4 and also change the offset from the
+% % circle and the max noise a dot can have from the original position (put
+% % zero if you do not want any noise).
+% shape_width=500; shape_height=500; n_dots_x=25;n_dots_y=25;multOf=4;grid_offset=20; dot_noise=5;
+% prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
+%
+% % create a circle 500x500 with 25 dots on the diameters and force the
+% % number to be a multiple of 4 and also change the offset from the
+% % circle and the max noise a dot can have from the original position
+% shape_width=505; shape_height=505; n_dots_x=26;n_dots_y=26;multOf=4;grid_offset=10; dot_noise=0;
+% prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
 
-function xy = prototypes_generate_grid_Rectangle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, offsetXY, dot_noise)
+close all;
+
+% be sure that the randomization is fine
+% rng('shuffle');
+rng(use_seed); % it should be 'shuffle';
+
+
+% =========================================================================
+% window parameters
+% =========================================================================
+
+% window size in pixels
+% [screen_width_px, screen_height_px]=Screen('WindowSize', 1 );
+
+% window size in mm
+% [screen_width_mm, screen_height_mm]=Screen('DisplaySize', 1);
+
+
+if nargin == 0
+    % =========================================================================
+    % shape parameters
+    % =========================================================================
+    % Circle diameter in pixel
+    shape_width     = 500;
+    shape_height    = 500;
+    
+    % =========================================================================
+    % grid parameters
+    % =========================================================================
+    n_dots_x        = 26;   % 25
+    n_dots_y        = 26;   % 25
+    grid_offset     = 5;    % it should be bigger than grid_offset so the borders are fine
+    dot_noise       = 2;
+    multOf          = 1;    % the final number of dots must be multiple of multOF. This is done if you want to have a division in blocks, for example
+end
+
+if nargin == 4
+    grid_offset      = 5;    % it should be bigger than grid_offset so the borders are fine
+    dot_noise       = 2;
+    multOf          = 4;    % the final number of dots must be multiple of multOF. This is done if you want to have a division in blocks, for example
+end
+
+if nargin == 5
+    grid_offset      = 5; % it should be bigger than grid_offset so the borders are fine
+    dot_noise       = 2;
+end
+
+% =========================================================================
+% generate grid
+% =========================================================================
+square_dim_x    = shape_width - grid_offset; %+grid_dim;
+square_dim_y    = shape_height - grid_offset; %+grid_dim;
+
+% x=grid_offset:grid_step:square_dim_x;
+% y=grid_offset:grid_step:square_dim_y;
+x = linspace(0, shape_width, n_dots_x);
+y = linspace(0, shape_height, n_dots_y);
+
+xy_y = repmat(y, 1 ,length(x))';
+xy_x = reshape(repmat(x, length(y),1),1,[])';
+
+xy = [xy_x, xy_y];
+
+% new_xy = new_xy - grid_dim/2;
+
+figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+
+n_dots = size(xy,1);
+
+
+% offset for dots
+xy=xy+random('norm', 0, dot_noise, n_dots, 2);
+hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+
+
+% =========================================================================
+% exlude dots that are outside the mask (a circle or a square, for example)
+% =========================================================================
+% xc = shape_width/2; yc = shape_height/2;
+xc = square_dim_x/2; yc = square_dim_y/2;
+
+
+x = xy(:,1);
+y = xy(:,2);
+
+% r = sqrt((x-xc-grid_offset/2).^2 + (y-yc-grid_offset/2).^2);
+
+
+excluded_points = x > shape_width - grid_offset | y > shape_height - grid_offset | x < grid_offset | y < grid_offset;
+
+xy(excluded_points, :) =[];
+
+% xy(x > grid_offset, :) =[];
+% xy(y > grid_offset, :) =[];
+
+% xy(r>xc, :)=[];
+hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+rectangle('Position', [0 0 shape_width shape_height],'Curvature', 0);
+
+
+%%
+n_dots = size(xy, 1);
+fprintf('number of dots: %d\n', n_dots);
+
+isMultOf = mod(n_dots,multOf);
+if isMultOf>0
+    idx2remove = randperm(n_dots);idx2remove=idx2remove(1:isMultOf);
+    idx2keep = setdiff(1:n_dots, idx2remove);
+    xy = xy(idx2keep,:);
+    n_dots = size(xy, 1);
+    fprintf('removing %d dots such that number of dots is multiple of: %d\n', isMultOf, multOf);
+    fprintf('number of dots: %d\n', n_dots);
+end
+
+
+
+function xy = prototypes_generate_grid_Rectangle_old(shape_width, shape_height, n_dots_x, n_dots_y, multOf, offsetXY, dot_noise)
 % function xy = prototypes_generate_grid_Square(shape_width, shape_height, n_dots_x, n_dots_y, offsetXY)
 
 x = linspace(0+offsetXY, shape_width-offsetXY, n_dots_x);
