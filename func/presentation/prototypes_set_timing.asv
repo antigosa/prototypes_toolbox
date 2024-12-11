@@ -1,5 +1,5 @@
-function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence)
-% function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence)
+function timing = prototypes_set_timing(grid_file, trials_sequence)
+% function timing = prototypes_set_timing(grid_file, trials_sequence)
 
 trials_sequence_tmp = trials_sequence(trials_sequence.trials_id>0,:);
 % =========================================================================
