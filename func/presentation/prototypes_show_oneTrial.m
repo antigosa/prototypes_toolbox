@@ -88,8 +88,8 @@ runTest = exp_param.metadata.runTest;
 % =========================================================================
 HideCursor;
 
-Rectcoord_FIRST = this_trial.Rectcoord_FIRST;
-Rectcoord_SECOND = this_trial.Rectcoord_SECOND;
+Rectcoord_FIRST     = this_trial.Rectcoord_FIRST;
+Rectcoord_SECOND    = this_trial.Rectcoord_SECOND;
 
 % =========================================================================
 % get the flip time of the initial trial
