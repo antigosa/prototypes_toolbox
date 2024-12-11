@@ -1,5 +1,5 @@
-function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence)
-% function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence)
+function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence, timing)
+% function [trials_sequence, timing] = prototypes_set_timing(grid_file, trials_sequence, timing)
 
 trials_sequence_tmp = trials_sequence(trials_sequence.trials_id>0,:);
 % =========================================================================
@@ -16,18 +16,22 @@ if runFast
     timing.locate_dots      = 0.001;
     
 else
-    % this is the real timing
-%     timing.ITI_duration     = 1;
-%     timing.rect1_duration   = 0.1;
-%     timing.dot_duration     = 0.4;
-%     timing.blank            = 1;
-%     timing.locate_dots      = 2;
-
-    timing.ITI_duration     = 1;
-    timing.rect1_duration   = 1;
-    timing.dot_duration     = 1;
-    timing.blank            = 1;
-    timing.locate_dots      = 2;
+    
+    if nargin<3
+        % this is the real timing
+        %     timing.ITI_duration     = 1;
+        %     timing.rect1_duration   = 0.1;
+        %     timing.dot_duration     = 0.4;
+        %     timing.blank            = 1;
+        %     timing.locate_dots      = 2;
+        
+        % Typical timing
+        timing.ITI_duration     = 1;
+        timing.rect1_duration   = 1;
+        timing.dot_duration     = 1;
+        timing.blank            = 1;
+        timing.locate_dots      = 2;
+    end
     
 end
 % timing.rate_performance = 3;

@@ -1,5 +1,5 @@
-function [Trials, actual_timing_table, mouse_track] = prototypes_show_oneTrial(Trials, this_trial, exp_param, actual_timing_table, mouse_track)
-% function [Trials, actual_timining_table, mouse_track] = prototypes_show_oneTrial(Trials, this_trial, exp_param, actual_timining_table, mouse_track)
+function [Trials, actual_timing_table] = prototypes_show_oneTrial(Trials, this_trial, exp_param, actual_timing_table)
+% function [Trials, actual_timining_table] = prototypes_show_oneTrial(Trials, this_trial, exp_param, actual_timining_table)
 
 %% get the parameters
 param_show_oneTrial = exp_param.param_show_oneTrial;
@@ -289,10 +289,8 @@ this_trial = [this_trial, ...
 Trials = prototypes_store_atrial(Trials, this_trial);
 
 
-mouse_track = [mouse_track; table({mouse_resp.x_mouse_resp}, {mouse_resp.y_mouse_resp}, 'VariableNames', {'x', 'y'})];
-
 % ADD OUTPUT FOLDER HERE!!
 if ~isfolder('backup'); mkdir('backup');end
-save (fullfile('backup', sprintf('%s_actual_timing.mat', subject_id)), 'actual_timing_table', 'mouse_track', 'Trials');
-% save (sprintf('%s_mouse_track.mat', subject_id), 'mouse_resp');
-% save (sprintf('%s_Resp_backup.mat', subject_id), 'Trials');
+save (fullfile(sprintf('%s_actual_timing.mat', subject_id), 'actual_timing_table');
+save (sprintf('%s_mouse_track.mat', subject_id), 'mouse_resp');
+save (sprintf('%s_Resp_backup.mat', subject_id), 'Trials');
