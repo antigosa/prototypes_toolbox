@@ -81,6 +81,9 @@ end
 runFast = exp_param.metadata.runFast;
 runTest = exp_param.metadata.runTest;
 
+% is this haptic and you want to use the camera?
+useCamera = exp_param.metadata.useCamera;
+
 % Wait after response is given?
 waitAferResponse = 0; % USEFUL FOR GSV
 
@@ -171,14 +174,49 @@ else
     prototypes_prepare_shape(win, rectangle_color, Rectcoord_FIRST);
 end
 prototypes_prepare_target(win, ActualDots_xy, target_color, Rectcoord_FIRST, rotationAngle)
-% actual_timing.dot_onset = Screen('Flip', win, actual_timing.rectangle1_onset+timing.rect1_duration);
-actual_timing.dot_onset = Screen('Flip', win, actual_timing.rectangle1_onset+this_trial.rect1_duration);
+
+
+if useCamera && strcmp(this_trial.Modality, 'haptic')
+    DrawFormattedText(win, 'Prepare pin on board and then press a button')
+    xy              = this_trial.ActualDots_xy;
+    Rectcoord       = this_trial.Rectcoord_SECOND;
+    dotID_col       = [256 256 256];
+    %     dot_id          = 1:100;
+    
+%     Screen('FillRect', win, [0 0 0], Rectcoord)
+%     cur_rect        = [Rectcoord(1) + xy(1), Rectcoord(2) + xy(2), Rectcoord(1) + xy(1) + 20, Rectcoord(2) + xy(2) + 20];
+    cur_rect        = [Rectcoord_FIRST(1) + xy(1), Rectcoord_FIRST(2) + xy(2), Rectcoord_FIRST(1) + xy(1) + 20, Rectcoord_FIRST(2) + xy(2) + 20];
+    [nx, ny, bbox]  = DrawFormattedText(win, num2str(this_trial.dot_id), 'center', 'center', dotID_col, [], [], [], [], [], cur_rect);
+    actual_timing.dot_onset = Screen('Flip', win);
+    KbWait;
+    
+else
+    % actual_timing.dot_onset = Screen('Flip', win, actual_timing.rectangle1_onset+timing.rect1_duration);
+    actual_timing.dot_onset = Screen('Flip', win, actual_timing.rectangle1_onset+this_trial.rect1_duration);
+end
+
+
 
 % =========================================================================
 % EVENT 3: EVERYTHING DISAPPEAR
 % =========================================================================
-% actual_timing.black_onset = Screen('Flip', win, actual_timing.dot_onset+timing.dot_duration);
-actual_timing.black_onset = Screen('Flip', win, actual_timing.dot_onset+this_trial.dot_duration);
+if useCamera && strcmp(this_trial.Modality, 'haptic')
+    sound(MakeBeep(8000, 0.1, 41000));
+    DrawFormattedText(win, 'Tell participant to explore the board')
+    Screen('Flip', win);
+    WaitSecs(this_trial.dot_duration); % Exploration time
+    
+    sound(MakeBeep(8000, 0.1, 41000));
+    DrawFormattedText(win, 'Tell participant to stop exploring the board, place an empty board and press a button to continue')
+    actual_timing.black_onset = Screen('Flip', win);
+    WaitSecs(1);
+    KbWait;
+
+else
+    % actual_timing.black_onset = Screen('Flip', win, actual_timing.dot_onset+timing.dot_duration);
+    actual_timing.black_onset = Screen('Flip', win, actual_timing.dot_onset+this_trial.dot_duration);    
+    
+end
 
 % =========================================================================
 % EVENT 4: SHOW THE SECOND FIGURE
@@ -196,8 +234,19 @@ if runTest
     %     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
     prototypes_prepare_target(win, ActualDots_xy, target_color, Rectcoord_SECOND, rotationAngle)
 end
-% actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+timing.blank);
-actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+this_trial.blank);
+
+if useCamera && strcmp(this_trial.Modality, 'haptic')
+    DrawFormattedText(win, 'Tell participant to place the pin and then press a button')
+    actual_timing.rectangle2_onset = Screen('Flip', win);
+    WaitSecs(1);
+    KbWait;
+    
+else  
+    % actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+timing.blank);
+    actual_timing.rectangle2_onset = Screen('Flip', win, actual_timing.black_onset+this_trial.blank);
+    
+    
+end
 
 % =========================================================================
 % EVENT 5: RESPONSE
@@ -230,8 +279,21 @@ if runFast
     mouse_resp.y_mouse_resp = xy(2)+ Rectcoord_SECOND(2); % TEST
 else
     
+    if useCamera && strcmp(this_trial.Modality, 'haptic')
+        DrawFormattedText(win, 'Press the mouse button to take a picture')
+        Screen('Flip', win);
+    end
+    
     % if the second parameter is empty, it means that participants can click anywhere
     [~, mouse_resp.x_mouse_resp,mouse_resp.y_mouse_resp] = ptb_getMouseResponse_withTracking(win, Rectcoord_SECOND); % Rectcoord_SECOND
+    
+    if useCamera && strcmp(this_trial.Modality, 'haptic')
+        theImage = getsnapshot(exp_param.metadata.theCamera);
+        img_name = sprintf('%s_block-%d_trial-%d_dot-%d.jpg', exp_param.subjInfo.subjNum, this_trial.blocks_id, this_trial.trials_id, this_trial.dot_id);
+        imwrite(theImage, fullfile(exp_param.subjInfo.folder, img_name),'JPEG');
+    end
+    
+    
 end
 
 % response_relToTrialStart = GetSecs-actual_timing.trial_start;

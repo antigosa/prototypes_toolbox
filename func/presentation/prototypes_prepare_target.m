@@ -1,5 +1,5 @@
-function protoperispace4_prepare_target(win, xy, col, Rectcoord, rotationAngle)
-% function protoperispace4_prepare_target(win, xy, col, Rectcoord, rotationAngle)
+function prototypes_prepare_target(win, xy, col, Rectcoord, rotationAngle)
+% function prototypes_prepare_target(win, xy, col, Rectcoord, rotationAngle)
 % updated method to show the dots: I am now using the centre of the rect
 % (see lines 19 and 20)
 

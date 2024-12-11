@@ -1,7 +1,5 @@
 function trials_sequence = prototypes_generate_trials_order(project_path, subjInfo, exp_param)
 % function trials_sequence = prototypes_generate_trials_order(project_path, subjInfo, exp_param)
-%
-%%% NOTE THIS IS ONLY VALID WITH 200 DOTS AND TWO CONDITIONS!!%%%%%%%
 
 % =========================================================================
 % gather parameters
@@ -73,25 +71,18 @@ blocks_id = repmat(1:nblocks, ntrials/nblocks,1);blocks_id=blocks_id(:);
 % prepare the dots divided in blocks
 % =========================================================================
 % distribute the dots randomly in the various blocks
-% NOTE THIS IS ONLY VALID WITH 200 DOTS AND TWO CONDITIONS!!
+% NOTE
 
 % trials_id_A = trials_id(1:200);
 % trials_id_B = trials_id(201:400);
 trials_id_A = trials_id(1:100);
 trials_id_B = trials_id(101:200);
-dots_id_A   = dot_id(1:100);
-dots_id_B   = dot_id(101:200);
 
-idx_A = randperm(length(trials_id_A));
-idx_B = randperm(length(trials_id_B));
 
-trials_id_A_rand = trials_id_A(idx_A);
-trials_id_B_rand = trials_id_B(idx_B);
+trials_id_A_rand = trials_id_A(randperm(length(trials_id_A)));
+trials_id_B_rand = trials_id_B(randperm(length(trials_id_B)));
+
 trials_id_rand = [trials_id_A_rand; trials_id_B_rand];
-
-dots_id_A_rand = dots_id_A(idx_A);
-dots_id_B_rand = dots_id_B(idx_B);
-dots_id_rand = [dots_id_A_rand; dots_id_B_rand];
 
 trials_id_blocks = reshape(trials_id_rand, [ntrials/nblocks, nblocks]);
 
@@ -161,7 +152,7 @@ quadrant_sequence_pract     = cellstr(repmat('all_screen', size(xy_practice,1), 
 ActualDots_xy_blocks = horzcat({'practise';xy_practice}, ActualDots_xy_blocks);
 trials_id           = vertcat(zeros(size(xy_practice,1),1), trials_id);
 blocks_id           = vertcat(zeros(size(xy_practice,1),1), blocks_id);
-dot_id             = vertcat(zeros(size(xy_practice,1),1), dots_id_rand);
+dot_id             = vertcat(zeros(size(xy_practice,1),1), dot_id);
 % subj_id             = ones(length(blocks_id), 1)*subjInfo.subjNum;
 subj_id             = repmat({subjInfo.subjNum}, length(blocks_id), 1);
 age                 = repmat(subjInfo.Age, length(blocks_id), 1);
