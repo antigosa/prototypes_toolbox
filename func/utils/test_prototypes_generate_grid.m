@@ -42,7 +42,7 @@ xy = [xy; xy];
 save(sprintf('TrialList_imsize%dx%d_ndots%d_nblocks%d_offset%d_Circle', ...
     ShapeRect(1), ShapeRect(1), n_dots, multOf, dot_noise), 'xy', 'shape_width', 'shape_height', 'screen_width_px', 'screen_height_px');
 
-%% Generate 200 dots
+%% Generate 200 dots (used in haptic experiment)
 Shape           = 'Rectangle';
 ShapeRect       = [660 660]; % px
 n_dots_x        = 12;

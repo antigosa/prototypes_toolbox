@@ -177,7 +177,7 @@ prototypes_prepare_target(win, ActualDots_xy, target_color, Rectcoord_FIRST, rot
 
 
 if useCamera && strcmp(this_trial.Modality, 'haptic')
-    DrawFormattedText(win, 'Prepare pin on board and then press a button')
+    DrawFormattedText(win, sprintf('Prepare pin on board and then press a button (Trial %d out of %d)', this_trial.trials_id, exp_param.ntrials));
     xy              = this_trial.ActualDots_xy;
     Rectcoord       = this_trial.Rectcoord_SECOND;
     dotID_col       = [256 256 256];
@@ -280,7 +280,8 @@ if runFast
 else
     
     if useCamera && strcmp(this_trial.Modality, 'haptic')
-        DrawFormattedText(win, 'Press the mouse button to take a picture')
+        DrawFormattedText(win, 'Press the mouse button within the rectanle to take a picture')
+        prototypes_prepare_shape(win, rectangle_color, Rectcoord_SECOND);
         Screen('Flip', win);
     end
     
