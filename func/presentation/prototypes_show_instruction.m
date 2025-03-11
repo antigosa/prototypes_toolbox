@@ -17,7 +17,7 @@ winRect = [];
 Instructions= 'You will see a circle, followed by the appearance of a dot inside it. \n Shortly afterwards, both the dot and the circle will disappear. \n  Shortly afterwards, the circle will appear again but in a different location. \n\n Your task is to reproduce the location of the dot relative to the circle using the cursor of the mouse. \n Please be careful and precise with your responses. Your reaction time will not be  recorded.\n\n Between blocks you will be able to rest if you feel tired. \n\n You will have some practice trials at the beginning. \n\n\n  Press the bar when you feel ready to start.';
 Screen(win,'TextSize',35); Screen(win,'TextFont','Times');
 [nx, ny, bbox] = DrawFormattedText(win, Instructions, 'center','center', [0 0 0], warpat,[],[],vertical_space, [], winRect); 
-Screen('FrameRect', win, 0, bbox);
+% Screen('FrameRect', win, 0, bbox);
 Screen(win,'Flip');
 KbWait;WaitSecs(1.5) 
 
