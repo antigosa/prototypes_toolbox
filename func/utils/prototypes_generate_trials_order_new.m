@@ -107,7 +107,7 @@ ntrialsXblock = size(trials_id_blocks,1);
 ActualDots_xy_blocks    = cell(3, nblocks); % +1 because of practise
 
 % create the blocks
-block_names = {'A1', 'A2', 'B1', 'B4'}; %, 'block5'};
+block_names = {'A1', 'A2', 'B1', 'B2'}; %, 'block5'};
 
 % here you can decide if you want to have the shape presented in different
 % part of the screen, like in the four subquadrants, or in the center, etc.
@@ -158,7 +158,7 @@ end
 % end
 
 if(strcmp(horzcat(blocks_order{:}), 'ABBA'))
-    ActualDots_xy_blocks=ActualDots_xy_blocks(:, [1 3 2 4]);
+    ActualDots_xy_blocks=ActualDots_xy_blocks(:, [1 3 4 2]);
 end
 
 Rectcoord_FIRST_Pract       = prototypes_randomise_location(shape_width, shape_height, rect_lim, size(xy_practice,1));
