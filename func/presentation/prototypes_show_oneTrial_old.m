@@ -24,12 +24,6 @@ nblocks             = param_show_oneTrial.nblocks;
 % get the trial
 trial_id            = this_trial.trials_id;
 
-if any(ismember(this_trial.Properties.VariableNames, 'Message'))
-    Messages            = cell2mat(this_trial.Message);
-else
-    Messages            = [];
-end
-
 % % get the shape/image dimensions
 % RectHeight          = this_trial.RectHeight;
 % RectWidth           = this_trial.RectWidth;
@@ -122,13 +116,26 @@ end
 % =========================================================================
 % show the message at the end of the practice
 % =========================================================================
-if ~isempty(Messages)
-    Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, Messages, 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
+if trial_id == 1
+    Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, 'End of the practice block.\n\nResponses will be recorded from now on.\n\nPress the bar when you feel ready to start.', 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
     KbWait;WaitSecs(1);
-    return
 end
 
-
+% =========================================================================
+% show the message at the end of the block
+% =========================================================================
+if trial_id ~= 1
+    if break_id == 1 && ~runFast
+        Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, sprintf('End of Block %d (out of %d)\n\nPlease take a rest\n\nPress the bar when you feel ready to start.', break_id, nblocks), 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
+        KbWait;WaitSecs(1);
+    end
+    
+    if break_id == 2 && ~runFast
+        Screen(win,'TextSize',40); Screen(win,'TextFont','Times');DrawFormattedText(win, sprintf('Please take a rest\n\nPress the bar when you feel ready to start.'), 'center','center', [0 0 0], 100,[],[],2); Screen(win,'Flip');
+        KbWait;WaitSecs(1);
+    end
+    
+end
 if any(ismember(this_trial.Properties.VariableNames, 'GVS'))
     if this_trial.GVS ~= -1 && this_trial.breaks_id ~= 0
         
@@ -152,7 +159,7 @@ if useImage
     prototypes_prepare_image(win, rectangle_color, im_text_idx, Rectcoord_FIRST, rotationAngle)
 else
     % choose the function for the type of stimulus
-    prototypes_prepare_shape = eval(sprintf('@prototypes_prepare_%s', cell2mat(stimulusType)));
+    prototypes_prepare_shape = eval(sprintf('@prototypes_prepare_%s', stimulusType));
     prototypes_prepare_shape(win, rectangle_color, Rectcoord_FIRST);
 end
 % actual_timing.rectangle1_onset = Screen('Flip', win, actual_timing.trial_start+timing.ITI_duration);
@@ -216,13 +223,15 @@ end
 % =========================================================================
 
 % show SECOND Figure
-if useImage    
+if useImage
+    %     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
     prototypes_prepare_image(win, rectangle_color, im_text_idx, Rectcoord_SECOND, rotationAngle)
 else
     prototypes_prepare_shape(win, rectangle_color, Rectcoord_SECOND);
 end
 
-if runTest    
+if runTest
+    %     rotationAngle = angles(randperm(length(angles)));rotationAngle = rotationAngle(1);% 45;
     prototypes_prepare_target(win, ActualDots_xy, target_color, Rectcoord_SECOND, rotationAngle)
 end
 
@@ -312,13 +321,14 @@ if waitAferResponse
 end
 
 %% post trial
+actual_timing_table         = [actual_timing_table; struct2table(actual_timing)];
 experiment_start            = actual_timing.experiment_start;
 trial_start                 = actual_timing.trial_start-actual_timing.experiment_start;
 ev1_onset                   = actual_timing.rectangle1_onset - actual_timing.trial_start;
 dot_onset                   = actual_timing.dot_onset - actual_timing.trial_start;
 blank_onset                 = actual_timing.black_onset - actual_timing.trial_start;
 ev2_onset                   = actual_timing.rectangle2_onset - actual_timing.trial_start;
-trial_dur                   = GetSecs-actual_timing.trial_start;
+trial_end                   = GetSecs-actual_timing.trial_start;
 RespDots_xy_relToShape      = resp - Rectcoord_SECOND([1 2]);
 RespDots_xy                 = prototypes_rotate_dots(RespDots_xy_relToShape, rotationAngle, [0 0]); % UPDATE [0, 0], OR IT'S GOING TO BE VERY WRONG!!
 RespDots_xy_relToScreen(1)  = resp(:,1) + Rectcoord_SECOND(1);
@@ -327,15 +337,17 @@ if size(RespDots_xy, 1)~=1; RespDots_xy=RespDots_xy';end
 errorXY                     = RespDots_xy - ActualDots_xy;
 errorMag                    = sqrt(diag(errorXY * errorXY'));
 
-actual_timing.trial_end     = GetSecs;
-actual_timing.trial_dur     = trial_dur;
-actual_timing_table         = [actual_timing_table; struct2table(actual_timing)];
 
 this_trial = [this_trial, ...
     table(RespDots_xy_relToShape, RespDots_xy, RespDots_xy_relToScreen, ...
-    errorXY, errorMag, screen_rect, MouseInitialLoc, experiment_start, trial_start, trial_dur, ev1_onset, dot_onset, blank_onset, ev2_onset)
+    errorXY, errorMag, screen_rect, MouseInitialLoc, experiment_start, trial_start, trial_end, ev1_onset, dot_onset, blank_onset, ev2_onset)
     ];
 
+% this_trial = table(subject_id, trial_id, ActualDots_xy, block_id, break_id, stimulusType, Rectcoord_FIRST, Rectcoord_SECOND, ...
+%     RespDots_xy_relToShape, RespDots_xy_relToShape_rot, RespDots_xy_relToScreen, ...
+%     errorXY, errorMag, rotationAngle, RectHeight, RectWidth, ...
+%     screen_rect, MouseInitialLoc, experiment_start, trial_start, ev1_onset, dot_onset, blank_onset, ev2_onset, ...
+%     useImage, mouse_type);
 
 Trials = prototypes_store_atrial(Trials, this_trial);
 
@@ -344,4 +356,6 @@ mouse_track = [mouse_track; table({mouse_resp.x_mouse_resp}, {mouse_resp.y_mouse
 
 % ADD OUTPUT FOLDER HERE!!
 if ~isfolder('backup'); mkdir('backup');end
-save (fullfile('backup', sprintf('%s_backup.mat', subject_id)), 'actual_timing_table', 'mouse_track', 'Trials');
+save (fullfile('backup', sprintf('%s_actual_timing.mat', subject_id)), 'actual_timing_table', 'mouse_track', 'Trials');
+% save (sprintf('%s_mouse_track.mat', subject_id), 'mouse_resp');
+% save (sprintf('%s_Resp_backup.mat', subject_id), 'Trials');
