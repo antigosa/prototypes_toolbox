@@ -1,5 +1,5 @@
-function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
-% function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
+function [ax, ax_img]=prototypes_plot_dots(ProtoTable, subj_id, dataType, whichSpace)
+% function [ax, ax_img]=prototypes_plot_dots(ProtoTable, subj_id, dataType, whichSpace)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
@@ -10,12 +10,12 @@ end
 ax=axes;
 
 if ~exist('whichSpace', 'var')||isempty(whichSpace); whichSpace='cart'; end
-if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
+if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
 if ~exist('dataType', 'var'); dataType='both'; end
 
-n = length(unique(ProtoTable.ParticipantID));
+n = length(unique(ProtoTable.subj_id));
 if n==1 
-    if strcmp(unique(ProtoTable.ParticipantID), 'group')
+    if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
     else
         % it's one participant
@@ -25,14 +25,14 @@ end
 
 
 if ~isgroupData
-    if ~ismember(ParticipantID, unique(ProtoTable.ParticipantID))
+    if ~ismember(subj_id, unique(ProtoTable.subj_id))
         warning('This subject is not part of this group');
         return;
     end
     
     % select a participant
-    %ProtoTable = ProtoTable(ProtoTable.ParticipantID==ParticipantID, :);
-    ProtoTable = ProtoTable(ismember(ProtoTable.ParticipantID, ParticipantID), :);
+    %ProtoTable = ProtoTable(ProtoTable.subj_id==subj_id, :);
+    ProtoTable = ProtoTable(ismember(ProtoTable.subj_id, subj_id), :);
 end
 
 switch whichSpace
@@ -49,17 +49,17 @@ switch whichSpace
         
         rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];        
         
-        switch prototypes_get_metadata(ProtoTable, 'StimulusType')
-            case 'Circle'
+        switch cell2mat(prototypes_get_metadata(ProtoTable, 'StimulusType'))
+            case {'Circle', 'circle'}
                 rectangle('Position', rectPos, 'Curvature', 1);
                 
-            case {'Square', 'Rectangle'}
+            case {'Square', 'Rectangle', 'square', 'rectangle'}
                 rectangle('Position', rectPos);
         end
 %         ax          = gca;
         ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
         
-        if strcmp(ParticipantID, 'group')
+        if strcmp(subj_id, 'group')
             ax.Units    = 'normalized';
             ax.Position = [0.05 0.05 0.82 0.9];
             if ~isempty(ax_img)
@@ -83,7 +83,7 @@ end
 
 function prototypes_plot_Resp_cartesian(ProtoTable, dataType)
 ActDots         = ProtoTable.ActualDots_xy;
-RespDots        = ProtoTable.ResponseDots_xy;
+RespDots        = ProtoTable.RespDots_xy;
 
 ax = gca;
 ax.Units = 'Pixel';
