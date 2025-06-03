@@ -47,7 +47,7 @@ switch whichSpace
         axis off; axis equal;
         axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
         
-        rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];        
+        rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
         
         switch cell2mat(prototypes_get_metadata(ProtoTable, 'StimulusType'))
             case {'Circle', 'circle'}
@@ -83,7 +83,7 @@ end
 
 function prototypes_plot_Resp_cartesian(ProtoTable, dataType)
 ActDots         = ProtoTable.ActualDots_xy;
-RespDots        = ProtoTable.RespDots_xy;
+RespDots        = ProtoTable.ResponseDots_xy;
 
 ax = gca;
 ax.Units = 'Pixel';

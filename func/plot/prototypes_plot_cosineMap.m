@@ -58,7 +58,9 @@ end
 
 rectPos = csm.Properties.UserData(idx_participant).ShapeRect;
 
-switch prototypes_get_metadata(csm, 'StimulusType')
+StimulusType = cell2mat(prototypes_get_metadata(csm, 'StimulusType'));
+
+switch StimulusType
     case 'Circle'
         rectangle('Position', rectPos, 'Curvature', 1);
         

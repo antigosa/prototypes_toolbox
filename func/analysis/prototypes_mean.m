@@ -7,8 +7,11 @@ function DataStat = prototypes_mean(Data)
 
 if istable(Data)
     
-    Data        = prototypes_setDotID(Data);
-    DataStat    = prototypes_mean_Responses(Data, {'DotID'});
+%     Data        = prototypes_setDotID(Data);
+%     DataStat    = prototypes_mean_Responses(Data, {'DotID'});
+    
+    DataStat    = prototypes_mean_Responses(Data, {'dot_id'});
+
 else
     DataStat = prototypes_mean_CosineMaps(Data);
 end
@@ -45,7 +48,7 @@ varToRemove         = Trials.Properties.VariableNames(varToRemove);
 idx_cellVariables   = ismember(Trials.Properties.VariableNames, varToRemove);
 Trials              = Trials(:, ~idx_cellVariables);
 
-Trials              = sortrows(Trials, {'ParticipantID_num', 'DotID'});
+Trials              = sortrows(Trials, {'ParticipantID_num', 'dot_id'});
 
 TrialsStat          = grpstats(Trials, varNames, {'nanmean'});
 
