@@ -1,5 +1,5 @@
-function [ax, ax_img]=prototypes_plot_dots(ProtoTable, subj_id, dataType, whichSpace)
-% function [ax, ax_img]=prototypes_plot_dots(ProtoTable, subj_id, dataType, whichSpace)
+function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
+% function [ax, ax_img]=prototypes_plot_dots(ProtoTable, ParticipantID, dataType, whichSpace)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
@@ -7,16 +7,17 @@ if exist('prototypes_plot_image.m', 'file') ~= 0
 else
     ax_img=[];
 end
-ax=axes;
+% ax=axes;
+ax=gca;
 
 if ~exist('whichSpace', 'var')||isempty(whichSpace); whichSpace='cart'; end
-if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
+if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
 if ~exist('dataType', 'var'); dataType='both'; end
 
-n = length(unique(ProtoTable.subj_id));
+n = length(unique(ProtoTable.ParticipantID));
 isgroupData = 0;
 if n==1 
-    if strcmp(unique(ProtoTable.subj_id), 'group')
+    if strcmp(unique(ProtoTable.ParticipantID), 'group')
         isgroupData = 1;
     else
         % it's one participant
@@ -26,14 +27,13 @@ end
 
 
 if ~isgroupData
-    if ~ismember(subj_id, unique(ProtoTable.subj_id))
+    if ~ismember(ParticipantID, unique(ProtoTable.ParticipantID))
         warning('This subject is not part of this group');
         return;
     end
     
-    % select a participant
-    %ProtoTable = ProtoTable(ProtoTable.subj_id==subj_id, :);
-    ProtoTable = ProtoTable(ismember(ProtoTable.subj_id, subj_id), :);
+    % select a participant    
+    ProtoTable = ProtoTable(ismember(ProtoTable.ParticipantID, ParticipantID), :);
 end
 
 switch whichSpace
@@ -50,7 +50,9 @@ switch whichSpace
         
         rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
         
-        switch cell2mat(prototypes_get_metadata(ProtoTable, 'StimulusType'))
+        ShapeType   = prototypes_get_metadata(ProtoTable, 'ShapeType');
+
+        switch ShapeType
             case {'Circle', 'circle'}
                 rectangle('Position', rectPos, 'Curvature', 1);
                 
@@ -60,7 +62,7 @@ switch whichSpace
 %         ax          = gca;
         ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
         
-        if strcmp(subj_id, 'group')
+        if strcmp(ParticipantID, 'group')
             ax.Units    = 'normalized';
             ax.Position = [0.05 0.05 0.82 0.9];
             if ~isempty(ax_img)

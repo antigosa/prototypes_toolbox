@@ -26,10 +26,10 @@ addpath(genpath('..\..\..\CoSMoMVPA'))
 
 % load the dataset ('SubjectsData')
 load('PrototypesData_Rectangle.mat', 'SubjectsData');
+prototypes_check_prototable(SubjectsData);
 
+%prototypes_summary(SubjectsData) TO UPDATE
 
-prototypes_summary(SubjectsData)
-prototypes_check_prototable(SubjectsData)
 
 % data info
 prototypes_info(SubjectsData);

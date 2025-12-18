@@ -123,14 +123,18 @@ end
 %     'something is wrong with the Height component of the Rectangle information');
 
 function proto_var = prototypes_variables
+% 
+% - ParticipantID: numeric
+% - ParticipantCODE: string
 % function proto_var=prototypes_variables
 % Variables
-proto_var.FundamentalVariables      = {'ParticipantID', 'trials_id', 'ActualDots_xy', 'ResponseDots_xy'};
-proto_var.ImportantVariables        = {'Block', 'Error_xy', 'ErrorMag', 'DotID'};
-proto_var.OptionalVariables         = {'MouseInitialLoc', 'ResponseDots_xy_relToScreen', 'ResponseDots_xy_relToShape', 'RectCoord_FIRST', 'RectCoord_SECOND'};
+proto_var.FundamentalVariables      = {'ParticipantID', 'trial_id', 'ActualDots_xy', 'ResponseDots_xy', 'dot_id', 'shape_type'};
+proto_var.ImportantVariables        = {'block_id', 'errorXY', 'errorMag'};
+proto_var.OptionalVariables         = {'ParticipantCODE', 'MouseInitialLoc', 'ResponseDots_xy_relToScreen', 'ResponseDots_xy_relToShape', 'RectCoord_FIRST', 'RectCoord_SECOND'};
+proto_var.Demographics              = {'age', 'gender', 'hand_preference', 'eye_preference'};
+proto_var.Experiment                = {'experiment', 'rot_angle', 'use_image', 'target_color', 'modality', 'iti_duration', 'rect1_duration', 'dot_duration'};
 
 % Field of .UserData
-proto_var.FundamentalUD             = {'ScreenRect', 'ShapeRect', 'ShapeContainerRect', 'YDir'};
-proto_var.ImportantUD               = {'Experiment', 'StimulusType', 'StimulusFileName', 'FolderName', 'FileName', 'ScreenDepth', 'ScreenPixelsPerInch', 'Units'};
+proto_var.FundamentalUD             = {'ScreenRect', 'ShapeRect', 'ShapeContainerRect', 'YDir', 'ShapeType'};
+proto_var.ImportantUD               = {'Experiment', 'StimulusFileName', 'FolderName', 'FileName', 'ScreenDepth', 'ScreenPixelsPerInch', 'Units'};
 proto_var.OptionalUD                = {'CosineMap'};
-

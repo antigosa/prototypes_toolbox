@@ -13,7 +13,7 @@ end
 
 disp(Participants);
 
-Dots.Ndots = length(unique(T.DotID));
+Dots.Ndots = length(unique(T.dot_id));
 
 disp(Dots);
 
