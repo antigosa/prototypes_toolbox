@@ -41,7 +41,7 @@ end
 
 varTypes            = prototypes_variablesTypes(Trials);
 
-varToRemove         = ismember(varTypes, {'cell', 'char'});
+varToRemove         = ismember(varTypes, {'cell', 'char', 'string'});
 
 varToRemove         = Trials.Properties.VariableNames(varToRemove);
 

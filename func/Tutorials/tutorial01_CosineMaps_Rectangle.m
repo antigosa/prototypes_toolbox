@@ -27,9 +27,15 @@ addpath(genpath('..\..\..\CoSMoMVPA'))
 % load the dataset ('SubjectsData')
 load('PrototypesData_Rectangle.mat', 'SubjectsData');
 
+
+prototypes_summary(SubjectsData)
+prototypes_check_prototable(SubjectsData)
+
 % data info
 prototypes_info(SubjectsData);
-nsubj   = 6;
+subject_ids = unique(SubjectsData.ParticipantID);
+
+nsubj   = length(subject_ids);
 
 % compute error vectors
 SubjectsData = prototypes_compute_errorVectors(SubjectsData);

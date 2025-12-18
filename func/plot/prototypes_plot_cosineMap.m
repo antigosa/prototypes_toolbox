@@ -4,8 +4,6 @@ function [ax, ax_img] = prototypes_plot_cosineMap(csm, ParticipantID, clim, data
 % dataType:
 % - 'SimixSubject', 'W_SimixSubject', if csm is not statistical output
 
-
-
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
 if ~exist('dataType', 'var')||isempty(dataType); dataType='W_SimixSubject'; end
 if ~exist('clim', 'var')||isempty(clim); clim=[-1 1]; end

@@ -14,6 +14,7 @@ if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
 if ~exist('dataType', 'var'); dataType='both'; end
 
 n = length(unique(ProtoTable.subj_id));
+isgroupData = 0;
 if n==1 
     if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
