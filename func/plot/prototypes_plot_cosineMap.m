@@ -4,9 +4,11 @@ function [ax, ax_img] = prototypes_plot_cosineMap(csm, ParticipantID, clim, data
 % dataType:
 % - 'SimixSubject', 'W_SimixSubject', if csm is not statistical output
 
+
+
 if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
-if ~exist('clim', 'var')||isempty(clim); clim=[-1 1]; end
 if ~exist('dataType', 'var')||isempty(dataType); dataType='W_SimixSubject'; end
+if ~exist('clim', 'var')||isempty(clim); clim=[-1 1]; end
 
 if ~isfield(csm, dataType); dataType='W_CosineMap_mean';end
 
@@ -33,17 +35,7 @@ else
     CSI_map = csm.(dataType);
 end
 
-% There are two cases: 
-% 1) there is one csm.Properties.UserData structure for each participant.
-% In that case, it is necessary to identify the correct ParticipantID
-% structure. 
-% 2) there is a unique csm.Properties.UserData that is valid for each
-% participant. 
 idx_participant = find(ismember(csm.ParticipantID, ParticipantID));
-
-if isscalar(csm.Properties.UserData) % equivalent to lengh==1
-    idx_participant = 1;
-end
 
 zoffset = 0;
 ydim    = size(CSI_map, 1);
@@ -66,9 +58,7 @@ end
 
 rectPos = csm.Properties.UserData(idx_participant).ShapeRect;
 
-ShapeType = prototypes_get_metadata(csm, 'ShapeType');
-
-switch ShapeType
+switch prototypes_get_metadata(csm, 'StimulusType')
     case 'Circle'
         rectangle('Position', rectPos, 'Curvature', 1);
         

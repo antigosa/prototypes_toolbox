@@ -1,19 +1,17 @@
-function ax=prototypes_plot_errorVectors(ProtoTable, ParticipantID)
-% function ax=prototypes_plot_errorVectors(ProtoTable, ParticipantID)
+function ax=prototypes_plot_errorVectors(ProtoTable, subj_id)
+% function ax=prototypes_plot_errorVectors(ProtoTable, subj_id)
 % dataType: 'ActDots' | 'RespDots'
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
      ax_img = prototypes_plot_image(ProtoTable);  
 end
-% ax=axes;
-ax=gca;
+ax=axes;
 
-if ~exist('ParticipantID', 'var')||isempty(ParticipantID); ParticipantID='group'; end
+if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
 
-n = length(unique(ProtoTable.ParticipantID));
-isgroupData = 0;
+n = length(unique(ProtoTable.subj_id));
 if n==1 
-    if strcmp(unique(ProtoTable.ParticipantID), 'group')
+    if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
     else
         % it's one participant
@@ -23,11 +21,11 @@ end
 
 
 if ~isgroupData
-    if ~ismember(ParticipantID, unique(ProtoTable.ParticipantID))
+    if ~ismember(subj_id, unique(ProtoTable.subj_id))
         warning('This subject is not part of this group');
         return;
     end
-    ProtoTable = ProtoTable(ismember(ProtoTable.ParticipantID, ParticipantID), :);
+    ProtoTable = ProtoTable(contains(ProtoTable.subj_id, subj_id), :);
 end
 
 ActDots         = ProtoTable.ActualDots_xy;
@@ -64,7 +62,7 @@ if isfield(ProtoTable.Properties.UserData, 'StimulusType')
 end
 % ax              = gca;
 ax.YDir         = prototypes_get_metadata(ProtoTable, 'YDir');
-if strcmp(ParticipantID, 'group')
+if strcmp(subj_id, 'group')
     ax.Units        = 'normalized';
     ax.Position     = [0.05 0.05 0.82 0.9];
     if ~isempty(ax_img)

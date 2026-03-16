@@ -7,11 +7,8 @@ function DataStat = prototypes_mean(Data)
 
 if istable(Data)
     
-%     Data        = prototypes_setDotID(Data);
-%     DataStat    = prototypes_mean_Responses(Data, {'DotID'});
-    
-    DataStat    = prototypes_mean_Responses(Data, {'dot_id'});
-
+    Data        = prototypes_setDotID(Data);
+    DataStat    = prototypes_mean_Responses(Data, {'DotID'});
 else
     DataStat = prototypes_mean_CosineMaps(Data);
 end
@@ -29,32 +26,32 @@ GroupCosineMaps.Properties.UserData     = SubjectsCosineMaps.Properties.UserData
 function TrialsStat = prototypes_mean_Responses(Trials, varNames)
 % function TrialsStat = prototypes_mean_Responses(Trials, varNames)
 
-% ParticipantID = unique(Trials.ParticipantID);
+ParticipantID = unique(Trials.ParticipantID);
 
-% ParticipantID_num = 1:length(ParticipantID);
+ParticipantID_num = 1:length(ParticipantID);
 
-% Trials.ParticipantID_num = zeros(length(Trials.ParticipantID),1);
+Trials.ParticipantID_num = zeros(length(Trials.ParticipantID),1);
 
-% for i = 1:length(ParticipantID)
-%     Trials.ParticipantID_num(ismember(Trials.ParticipantID, ParticipantID{i})) = ParticipantID_num(i);
-% end
+for i = 1:length(ParticipantID)
+    Trials.ParticipantID_num(ismember(Trials.ParticipantID, ParticipantID{i})) = ParticipantID_num(i);
+end
 
 varTypes            = prototypes_variablesTypes(Trials);
 
-varToRemove         = ismember(varTypes, {'cell', 'char', 'string'});
+varToRemove         = ismember(varTypes, {'cell', 'char'});
 
 varToRemove         = Trials.Properties.VariableNames(varToRemove);
 
 idx_cellVariables   = ismember(Trials.Properties.VariableNames, varToRemove);
 Trials              = Trials(:, ~idx_cellVariables);
 
-Trials              = sortrows(Trials, {'ParticipantID', 'dot_id'});
+Trials              = sortrows(Trials, {'ParticipantID_num', 'DotID'});
 
 TrialsStat          = grpstats(Trials, varNames, {'nanmean'});
 
 TrialsStat.Properties.VariableNames = strrep(TrialsStat.Properties.VariableNames, 'nanmean_GroupCount', 'N');
 
-varToRemove         = {'nanmean_ParticipantID', 'nanmean_trial_id', 'nanmean_block_id', 'ParticipantID'};
+varToRemove         = {'nanmean_ParticipantID', 'nanmean_Trial', 'nanmean_Block', 'ParticipantID_num'};
 idx_cellVariables   = ismember(TrialsStat.Properties.VariableNames, varToRemove);
 TrialsStat          = TrialsStat(:, ~idx_cellVariables);
 
