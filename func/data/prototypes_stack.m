@@ -1,5 +1,7 @@
 function D_out = prototypes_stack(D_in)
-
+% function D_out = prototypes_stack(D_in)
+% 
+% Stack two or more prototype tables or cosine maps structures
 
 if isstruct(D_in{1})
     % dataset is a cosine map (check)
@@ -10,6 +12,8 @@ end
 
 
 function D_out = prototypes_stack_csimaps(D_in)
+
+% THIS COULD BE UPDATED, CHECK load_prototype_data.m
 
 ncells = length(D_in);
 
