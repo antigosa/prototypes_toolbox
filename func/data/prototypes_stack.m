@@ -20,7 +20,7 @@ ncells = length(D_in);
 for i=1:ncells
     if i==1
         D_out = D_in{i};
-        D_out.Properties.UserData
+%         D_out.Properties.UserData; % DO I NEED THIS?
     else
         D_out.SimixSubject(:, :, i)     = D_in{i}.SimixSubject;
         D_out.W_SimixSubject(:, :, i)   = D_in{i}.W_SimixSubject;

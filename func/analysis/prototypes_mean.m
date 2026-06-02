@@ -19,21 +19,32 @@ function GroupCosineMaps = prototypes_mean_CosineMaps(SubjectsCosineMaps)
 GroupCosineMaps.CosineMap_mean          = mean(SubjectsCosineMaps.SimixSubject, 3);
 GroupCosineMaps.W_CosineMap_mean        = mean(SubjectsCosineMaps.W_SimixSubject, 3);
 GroupCosineMaps.W_CosineMap_sd          = std(SubjectsCosineMaps.W_SimixSubject, [], 3);
-GroupCosineMaps.ParticipantID           = {'group'};
+% GroupCosineMaps.ParticipantID           = {'group'};
+GroupCosineMaps.subj_id                 = {'group'};
 GroupCosineMaps.Properties.UserData     = SubjectsCosineMaps.Properties.UserData;
 
 
 function TrialsStat = prototypes_mean_Responses(Trials, varNames)
 % function TrialsStat = prototypes_mean_Responses(Trials, varNames)
 
-ParticipantID = unique(Trials.ParticipantID);
+subj_id = unique(Trials.subj_id);
 
-ParticipantID_num = 1:length(ParticipantID);
-
-Trials.ParticipantID_num = zeros(length(Trials.ParticipantID),1);
-
-for i = 1:length(ParticipantID)
-    Trials.ParticipantID_num(ismember(Trials.ParticipantID, ParticipantID{i})) = ParticipantID_num(i);
+if ~isnumeric(subj_id)    
+    
+    % TEST THIS!!!
+    
+    ParticipantID_num = 1:length(subj_id);
+    
+    Trials.ParticipantID_num = zeros(length(Trials.subj_id),1);
+    
+    for i = 1:length(subj_id)
+        Trials.ParticipantID_num(ismember(Trials.subj_id, subj_id{i})) = ParticipantID_num(i);
+    end
+    
+    Trials.subj_id = Trials.ParticipantID_num;
+    
+    Trials.ParticipantID_num = [];
+   
 end
 
 varTypes            = prototypes_variablesTypes(Trials);
@@ -45,13 +56,13 @@ varToRemove         = Trials.Properties.VariableNames(varToRemove);
 idx_cellVariables   = ismember(Trials.Properties.VariableNames, varToRemove);
 Trials              = Trials(:, ~idx_cellVariables);
 
-Trials              = sortrows(Trials, {'ParticipantID_num', 'DotID'});
+Trials              = sortrows(Trials, {'subj_id', 'DotID'});
 
 TrialsStat          = grpstats(Trials, varNames, {'nanmean'});
 
 TrialsStat.Properties.VariableNames = strrep(TrialsStat.Properties.VariableNames, 'nanmean_GroupCount', 'N');
 
-varToRemove         = {'nanmean_ParticipantID', 'nanmean_Trial', 'nanmean_Block', 'ParticipantID_num'};
+varToRemove         = {'nanmean_ParticipantID', 'nanmean_Trial', 'nanmean_Block', 'subj_id'};
 idx_cellVariables   = ismember(TrialsStat.Properties.VariableNames, varToRemove);
 TrialsStat          = TrialsStat(:, ~idx_cellVariables);
 
@@ -60,7 +71,10 @@ newVariableNames = strrep(TrialsStat.Properties.VariableNames, 'nanmean_', '');
 
 TrialsStat.Properties.VariableNames = newVariableNames;
 TrialsStat.Properties.UserData      = Trials.Properties.UserData;
-TrialsStat.ParticipantID(:)         = {'group'};
+
+TrialsStat.subj_id = [];
+
+TrialsStat.subj_id(:)         = {'group'};
 
 
 function varTypes = prototypes_variablesTypes(Trials)

@@ -10,12 +10,11 @@ ax=axes;
 if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
 
 n = length(unique(ProtoTable.subj_id));
+
+isgroupData = 0;
 if n==1 
     if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
-    else
-        % it's one participant
-        isgroupData = 0;
     end
 end
 
@@ -25,7 +24,18 @@ if ~isgroupData
         warning('This subject is not part of this group');
         return;
     end
-    ProtoTable = ProtoTable(contains(ProtoTable.subj_id, subj_id), :);
+    
+    if ischar(unique(ProtoTable.subj_id))
+        ProtoTable = ProtoTable(contains(ProtoTable.subj_id, subj_id), :);
+    else
+        ProtoTable = ProtoTable(ProtoTable.subj_id == subj_id, :);
+    end
+end
+
+if ~any(contains(ProtoTable.Properties.VariableNames, 'errorXY'))
+    warning('This dataset does not have the error vectors. Pleas use ''prototypes_compute_errorVectors''');
+    close;
+    return
 end
 
 ActDots         = ProtoTable.ActualDots_xy;
@@ -42,17 +52,23 @@ q.LineWidth     = 1;
 axis off;axis equal;
 
 
-
 if isfield(ProtoTable.Properties.UserData, 'ShapeContainerRect')
     axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
 end
 
 if isfield(ProtoTable.Properties.UserData, 'ShapeRect')
     rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
+else
+    warning('ShapeRect not provided, the shape won''t be plotted');
 end
 
-if isfield(ProtoTable.Properties.UserData, 'StimulusType')
-    switch cell2mat(prototypes_get_metadata(ProtoTable, 'StimulusType'))
+if isfield(ProtoTable.Properties.UserData, 'StimulusType') && isfield(ProtoTable.Properties.UserData, 'ShapeRect')
+    StimulusType = prototypes_get_metadata(ProtoTable, 'StimulusType');
+    if iscell(StimulusType)
+        StimulusType = cell2mat(StimulusType);
+    end
+    
+    switch StimulusType
         case {'Circle', 'circle'}
             rectangle('Position', rectPos, 'Curvature', 1);
 

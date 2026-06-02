@@ -29,7 +29,7 @@ end
 switch testType
     case 'oneSamples'
         groupStat = prototypes_stat_secondLevel_oneSampleT(csm_or_cell, opt);
-        groupStat.Properties.UserData = csm_or_cell.Properties.UserData;
+        groupStat.Properties.UserData = csm_or_cell.Properties.UserData(1); % Save only one UserData
         
     case 'twoSamples'
         groupStat = prototypes_stat_secondLevel_twoSamplesT(csm_or_cell, opt);
@@ -172,8 +172,15 @@ end
 % add important info
 groupStat.puncorr                   = puncorr;
 groupStat.df                        = res.df;
-groupStat.ParticipantID             = unique(csm.ParticipantID);
-groupStat.alphavalue                = csm.alphavalue;
+
+% I used to save all individual subjects info, but not sure I need this.
+% groupStat.subj_id                     = unique(csm.ParticipantID);
+% groupStat.alphavalue                = csm.alphavalue;
+
+groupStat.subj_id                   = {'group'};
+groupStat.nsubj                     = length(unique(csm.ParticipantID));
+groupStat.alphavalue                = csm.alphavalue(1);
+
 
 function groupStat = prototypes_stat_secondLevel_twoSamplesT(csm, opt)
 
