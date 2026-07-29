@@ -1,37 +1,23 @@
-function D_out = prototypes_stack(D_in)
-% function D_out = prototypes_stack(D_in)
+function ProtoData = prototypes_stack(ProtoData_cell)
+% function ProtoData = prototypes_stack(ProtoData_cell)
 % 
 % Stack two or more prototype tables or cosine maps structures
 
-if isstruct(D_in{1})
-    % dataset is a cosine map (check)
-    D_out = prototypes_stack_csimaps(D_in);
+
+
+Trials = stack_T(ProtoData_cell);
+
+if isfield(ProtoData_cell{1}, 'csimaps')
+    CSImaps = stack_csimaps(ProtoData_cell);
 else
-    D_out = prototypes_stack_T(D_in);
+    CSImaps = [];
 end
 
+ProtoData=prototypes_ProtoStructure(Trials, CSImaps);
 
-function D_out = prototypes_stack_csimaps(D_in)
 
-% THIS COULD BE UPDATED, CHECK load_prototype_data.m
 
-ncells = length(D_in);
-
-for i=1:ncells
-    if i==1
-        D_out = D_in{i};
-%         D_out.Properties.UserData; % DO I NEED THIS?
-    else
-        D_out.SimixSubject(:, :, i)     = D_in{i}.SimixSubject;
-        D_out.W_SimixSubject(:, :, i)   = D_in{i}.W_SimixSubject;
-        D_out.ParticipantID(i)          = D_in{i}.ParticipantID;
-        D_out.Properties.UserData(i)    = D_in{i}.Properties.UserData;
-        D_out.alphavalue(i)             = D_in{i}.alphavalue;
-    end
-    
-end
-
-function D_out = prototypes_stack_T(D_in)
+function D_out = stack_T(D_in)
 
 ncells = length(D_in);
 
@@ -39,5 +25,33 @@ D_out = table;
 
 for i=1:ncells
     
-    D_out = [D_out; D_in{i}];
+    D_out = [D_out; D_in{i}.Trials];
+end
+
+function D_out = stack_csimaps(D_in)
+
+ncells = length(D_in);
+
+for i=1:ncells
+    if i==1
+        D_out = D_in{i}.csimaps;
+        D_out.Properties.UserData;
+    else
+        
+        fn = fieldnames(D_out);
+        fn = setdiff(fn, 'Properties');
+        
+        for j = 1:length(fn)
+            if length(size(D_out.(fn{j}))) == 3
+                D_out.(fn{j}) = cat(3, D_out.(fn{j}), D_in{i}.csimaps.(fn{j}));
+            elseif size(D_out.ParticipantID,1)==1
+                D_out.(fn{j}) = horzcat(D_out.(fn{j}), D_in{i}.csimaps.(fn{j}));
+            end
+        end
+        
+        D_out.Properties.UserData       = cat(2, D_out.Properties.UserData, D_in{i}.csimaps.Properties.UserData);
+        
+        
+    end
+    
 end

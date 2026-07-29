@@ -20,8 +20,19 @@ else
     csimapsStat    = [];
 end
 
-ProtoData.Trials    = TrialsStat;
-ProtoData.csimaps   = csimapsStat;
+% ProtoData.Trials    = TrialsStat;
+% ProtoData.csimaps   = csimapsStat;
+% ProtoData.nSubjects = 1;
+
+TrialsStat.experiment(:) = unique(Trials.experiment);
+TrialsStat.stimulus_type(:) = unique(Trials.stimulus_type);
+TrialsStat(:, {'breaks_id', 'blocks_id', 'Rectcoord_FIRST', 'Rectcoord_SECOND'})=[];
+TrialsStat.trials_id(:) = 1:size(TrialsStat, 1);
+
+opt = [];
+opt.computeSummary=0;
+ProtoData=prototypes_ProtoStructure(TrialsStat, csimapsStat, opt);
+ProtoData.stat={'mean'};
 
 
 function GroupCosineMaps = prototypes_mean_CosineMaps(SubjectsCosineMaps)

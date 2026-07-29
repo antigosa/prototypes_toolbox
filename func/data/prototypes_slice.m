@@ -1,13 +1,17 @@
-function ProtoData = prototypes_slice(ProtoData, varname, varvals)
+function ProtoData = prototypes_slice(ProtoData, varname, varvals, opt)
+% function ProtoData = prototypes_slice(ProtoData, varname, varvals, opt)
 
+if nargin<4;opt=[];end
+
+if ~isfield(opt, 'sliceCSImaps'); opt.sliceCSImaps=1;end
 
 idx = ismember(ProtoData.Trials.(varname), varvals);
 Trials  = ProtoData.Trials(idx, :);
 
-if strcmp(varname, 'subj_id')
+if ~isempty(ProtoData.csimaps) && opt.sliceCSImaps
     % only subjects can be sliced for csimaps, otherwise, they need to be
     % recomputed (e.g., if trials are sliced)
-    csimaps = prototypes_slice_csimap(ProtoData.csimaps, varvals);
+    csimaps = prototypes_slice_csimap(ProtoData.csimaps, varname, varvals);
         
 else
     csimaps=[];
@@ -18,7 +22,7 @@ ProtoData                = prototypes_ProtoStructure(Trials, csimaps);
 
 
 
-function tmp = prototypes_slice_csimap(csimap, varvals)
+function tmp = prototypes_slice_csimap(csimap, varname, varvals)
 % if isfield(csimap, 'stats')
 %     csimap = rmfield(csimap, 'stats');
 % end
@@ -26,9 +30,7 @@ tmp = csimap;
 
 fn = fieldnames(csimap);
 
-idx = find(ismember(csimap.subj_id, varvals));
-
-n = length(idx);
+idx = find(ismember(csimap.(varname), varvals));
 
 for i = 1:length(fn)
     sz = size(csimap.(fn{i}));

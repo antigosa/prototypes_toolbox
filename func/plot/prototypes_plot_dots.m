@@ -22,6 +22,7 @@ if ~isfield(opt, 'trials_highlight'); opt.trials_highlight=[];end
 if ~isfield(opt, 'dots'); opt.dots=[];end
 if ~isfield(opt, 'dots_highlight'); opt.dots_highlight=[];end
 if ~isfield(opt, 'showErrors'); opt.showErrors=1;end
+if ~isfield(opt, 'showRect'); opt.showRect=1;end
 
 subj_id = opt.subj_id;
 
@@ -83,7 +84,18 @@ switch opt.whichSpace
         % prototypes_plot_setup(ProtoTable, l);
         
         axis off; axis equal;
-        axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
+%         ax_csimap = findobj(gcf, 'Type', 'axes', 'Tag', 'csimap');
+%         
+%         if ~isempty(ax_csimap)
+%             ax.Units='pixels';
+%             ax.Position = [66 66 726 726];
+%             ax.XLim = [0 660];
+%             ax.YLim = [0 660];
+%         end
+        
+        ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
+        axis(ProtoTable.Properties.UserData.ShapeRect([1 3 2 4]))
+%         axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
         
         rectPos     = [ProtoTable.Properties.UserData.ShapeRect([1 2]) ProtoTable.Properties.UserData.ShapeRect([3 4])-ProtoTable.Properties.UserData.ShapeRect([1 2])];
         
@@ -95,7 +107,7 @@ switch opt.whichSpace
                 rectangle('Position', rectPos);
         end
 %         ax          = gca;
-        ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
+        
         
         if strcmp(subj_id, 'group')
             ax.Units    = 'normalized';

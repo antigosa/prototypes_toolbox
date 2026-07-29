@@ -1,4 +1,4 @@
-function prototypes_save_plot(plotType, Trials, img_type, appendInfo)
+function prototypes_save_plot(opt)
 % function prototypes_save_plot(plotType, Trials, img_type, appendInfo)
 % 
 % plotType: used to make the name of the image file

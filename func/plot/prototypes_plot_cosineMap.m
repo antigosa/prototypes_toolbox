@@ -12,8 +12,11 @@ csm = ProtoData.csimaps;
 if ~isfield(opt, 'subj_id'); opt.subj_id=csm.subj_id;end
 if ~isfield(opt, 'clim'); opt.clim=[-1 1];end
 if ~isfield(opt, 'useMesh'); opt.useMesh=0;end
-if ~isfield(opt, 'showRect'); opt.showRect=0;end
+if ~isfield(opt, 'showRect'); opt.showRect=1;end
 if ~isfield(opt, 'showColorbar'); opt.showColorbar=1;end
+if ~isfield(opt, 'showErrors'); opt.showErrors=0;end
+if ~isfield(opt, 'plotShapeContainer'); opt.plotShapeContainer=0;end
+
 
 subj_id = opt.subj_id;
 clim = opt.clim;
@@ -56,9 +59,13 @@ else
     imagesc(CSI_map);
 end
 
-axis off;axis equal;
-% axis(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 3 2 4]));
+axis equal;
+
+
 ax              = gca;
+ax.Tag          = 'csimap';
+
+
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
     ax_img = prototypes_plot_image(csm);
@@ -66,7 +73,21 @@ else
     ax_img=[];
 end
 
+shapeContainerRect = abs(csm.Properties.UserData(idx_participant).ShapeContainerRect);
+ShapeRect = csm.Properties.UserData(idx_participant).ShapeRect;
+
 rectPos = csm.Properties.UserData(idx_participant).ShapeRect;
+
+
+if opt.plotShapeContainer
+    ax.XLim = [0 shapeContainerRect(1)+ShapeRect(3)+shapeContainerRect(1)];
+    ax.YLim = [0 shapeContainerRect(2)+ShapeRect(4)+shapeContainerRect(2)];
+else
+    ax.XLim = [shapeContainerRect(1) shapeContainerRect(1)+ShapeRect(3)];
+    ax.YLim = [shapeContainerRect(2) shapeContainerRect(1)+ShapeRect(4)];
+end
+
+axis off;
 
 rectPos([1 2]) = rectPos([1 2]) + abs(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 2]));
 
@@ -120,4 +141,21 @@ if strcmp(subj_id, 'group')
         ax_img.Position     = [0.05 0.05 0.82 0.9];
     end
     
+end
+
+if opt.showErrors      
+    subjProtoData = prototypes_slice(ProtoData, 'subj_id', subj_id);
+    ProtoTable = subjProtoData.Trials; 
+    
+    
+    ActDots         = ProtoTable.ActualDots_xy + abs(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 2]));
+%     RespDots        = ProtoTable.ResponseDots_xy;    
+    
+    errorVector     = ProtoTable.errorXY;
+    hold on;
+    
+    q               = quiver(ActDots(:,1), ActDots(:,2), errorVector(:,1), errorVector(:,2),0); % Use S=0 to plot the arrows without the automatic scaling.
+    q.Color         = 'k';
+    q.LineWidth     = 1;    
+        
 end

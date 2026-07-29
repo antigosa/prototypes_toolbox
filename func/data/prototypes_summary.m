@@ -38,11 +38,15 @@ T_summary = vertcat(T_summary{:});
 T_demo = vertcat(T_demo{:});
 T_nTrialsXpart = vertcat(T_nTrialsXpart{:});
 
-T_demo.hand_preference=regexprep(T_demo.hand_preference, '^RH$|^rh$|^r$', 'rh');
-T_demo.hand_preference=regexprep(T_demo.hand_preference, '^LH$|^lh$|^l$', 'lh');
+if ismember('hand_preference', T_demo.Properties.VariableNames)
+    T_demo.hand_preference=regexprep(T_demo.hand_preference, '^RH$|^rh$|^r$', 'rh');
+    T_demo.hand_preference=regexprep(T_demo.hand_preference, '^LH$|^lh$|^l$', 'lh');
+end
 
-T_demo.gender=regexprep(T_demo.gender, '^M$', 'm');
-T_demo.gender=regexprep(T_demo.gender, '^F$|', 'f');
+if ismember('gender', T_demo.Properties.VariableNames)
+    T_demo.gender=regexprep(T_demo.gender, '^M$', 'm');
+    T_demo.gender=regexprep(T_demo.gender, '^F$|', 'f');
+end
 
 
 function [T_summary, T_demo, T_nTrialsXpart] = prototypes_summary_helper(T_in, opt)
@@ -50,9 +54,9 @@ function [T_summary, T_demo, T_nTrialsXpart] = prototypes_summary_helper(T_in, o
 verbose     = opt.verbose;
 group_by    = opt.group_by;
 
-T_Unique = unique(T_in(:, horzcat(group_by, {'ParticipantID', 'trials_id'})), 'rows');
+T_Unique = unique(T_in(:, horzcat(group_by, {'subj_id', 'trials_id'})), 'rows');
 
-T_nTrialsXpart = groupcounts(T_Unique, horzcat(group_by, {'ParticipantID'}));
+T_nTrialsXpart = groupcounts(T_Unique, horzcat(group_by, {'subj_id'}));
 T_nTrialsXpart.Properties.VariableNames{strcmp(T_nTrialsXpart.Properties.VariableNames, 'GroupCount')} = 'N_trials';
 
 
@@ -60,25 +64,39 @@ T_nTrialsXpart.Properties.VariableNames{strcmp(T_nTrialsXpart.Properties.Variabl
 nTrials_mean = groupsummary(T_nTrialsXpart, group_by, {'mean', 'std'}, 'N_trials');
 nTrials_mean = nTrials_mean.mean_N_trials;
 
-% T_demo = unique(T_in(:, {'ParticipantID', 'age', 'gender', 'hand_preference'}));
-T_demo = unique(T_in(:, horzcat(group_by, {'ParticipantID', 'age', 'gender', 'hand_preference'})));
 
+demo_vars = {'subj_id', 'age', 'gender', 'hand_preference'};
 
-% nTrials_mean = groupsummary(T_demo, group_by2, {'mean', 'std'}, 'age');
+demo_vars = demo_vars(ismember(demo_vars, T_in.Properties.VariableNames));
 
+T_demo = unique(T_in(:, horzcat(group_by, demo_vars)));
 
-% nTrials_count = groupcounts(T_demo, 'gender');
 
 N = size(T_demo,1);
 
-Age_mean    = mean(T_demo.age);
-Age_std     = std(T_demo.age);
+if ismember('age', demo_vars)
+    Age_mean    = mean(T_demo.age);
+    Age_std     = std(T_demo.age);
+else
+    Age_mean    = {[]};
+    Age_std     = {[]};
+end
 
-n_men       = sum(strcmp(T_demo.gender, 'M'));
-n_women     = sum(strcmp(T_demo.gender, 'F'));
+if ismember('gender', demo_vars)
+    n_men       = sum(strcmp(T_demo.gender, 'M'));
+    n_women     = sum(strcmp(T_demo.gender, 'F'));
+else
+    n_men       = {[]};
+    n_women     = {[]};    
+end
 
-n_rightHand = sum(strcmp(T_demo.hand_preference, 'rh'));
-n_leftHand  = sum(strcmp(T_demo.hand_preference, 'lh'));
+if ismember('hand_preference', demo_vars)
+    n_rightHand = sum(strcmp(T_demo.hand_preference, 'rh'));
+    n_leftHand  = sum(strcmp(T_demo.hand_preference, 'lh'));
+else
+    n_rightHand = {[]};
+    n_leftHand  = {[]};    
+end
 
 T_summary = table(N, Age_mean, Age_std, n_men, n_women, n_rightHand, n_leftHand, nTrials_mean);
 
