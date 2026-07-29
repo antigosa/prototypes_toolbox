@@ -1,23 +1,31 @@
-function [ax, ax_img] = prototypes_plot_cosineMap(csm, subj_id, clim, dataType, opt)
-% function [ax, ax_img] = prototypes_plot_cosineMap(csm, subj_id, clim, dataType, opt)
+function [ax, ax_img] = prototypes_plot_cosineMap(ProtoData, dataType, opt)
+% function [ax, ax_img] = prototypes_plot_cosineMap(ProtoData, dataType, opt)
 %
 % dataType:
 % - 'SimixSubject', 'W_SimixSubject', if csm is not statistical output
 
-if ~exist('subj_id', 'var')||isempty(subj_id); subj_id='group'; end
-if ~exist('dataType', 'var')||isempty(dataType); dataType='W_SimixSubject'; end
-if ~exist('clim', 'var')||isempty(clim); clim=[-1 1]; end
-if nargin<5; opt=[];end
+if nargin<2;dataType='W_SimixSubject';end
+if nargin<3;opt = [];end
 
+csm = ProtoData.csimaps;
+
+if ~isfield(opt, 'subj_id'); opt.subj_id=csm.subj_id;end
+if ~isfield(opt, 'clim'); opt.clim=[-1 1];end
 if ~isfield(opt, 'useMesh'); opt.useMesh=0;end
+if ~isfield(opt, 'showRect'); opt.showRect=0;end
+if ~isfield(opt, 'showColorbar'); opt.showColorbar=1;end
 
-if ~isfield(csm, dataType); dataType='W_CosineMap_mean';end
+subj_id = opt.subj_id;
+clim = opt.clim;
 
-isgroupData = 0;
-n = length(unique(csm.subj_id));
+% n = length(unique(csm.subj_id));
+n = length(subj_id);
 if n==1
     if strcmp(unique(csm.subj_id), 'group')
         isgroupData = 1;
+    else
+        % it's one participant
+        isgroupData = 0;
     end
 end
 
@@ -49,7 +57,7 @@ else
 end
 
 axis off;axis equal;
-axis(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 3 2 4]));
+% axis(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 3 2 4]));
 ax              = gca;
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
@@ -60,42 +68,49 @@ end
 
 rectPos = csm.Properties.UserData(idx_participant).ShapeRect;
 
+rectPos([1 2]) = rectPos([1 2]) + abs(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 2]));
+
 StimulusType = prototypes_get_metadata(csm, 'StimulusType');
 if iscell(StimulusType)
     StimulusType = cell2mat(StimulusType);
 end
 
-switch StimulusType
-    case {'Circle'}
-        rectangle('Position', rectPos, 'Curvature', 1);
-        
-    case {'Square', 'Rectangle'}
-        rectangle('Position', rectPos);
-        
-    case {'Face'}
-        rectangle('Position', rectPos, 'Curvature', [1 0.9]);
-        
-    case {'Oval'}
-        rectangle('Position', rectPos, 'Curvature', [1 0.9]);
+if opt.showRect
+    switch StimulusType
+        case {'Circle'}
+            rectangle('Position', rectPos, 'Curvature', 1);
+            
+        case {'Square', 'Rectangle'}
+            rectangle('Position', rectPos);
+            
+        case {'Face'}
+            rectangle('Position', rectPos, 'Curvature', [1 0.9]);
+            
+        case {'Oval'}
+            rectangle('Position', rectPos, 'Curvature', [1 0.9]);
+    end
 end
-
 ax.YDir         = prototypes_get_metadata(csm, 'YDir');
 if ~isempty(ax_img)
     cb_im = colorbar(ax_img);
     cb_im.Visible='Off';
 end
 
-cb              = colorbar(ax);
-if opt.useMesh
-    cb.Limits       = [clim(1) clim(2)]-zoffset;
-    cb.Ticks        = linspace(clim(1)-zoffset, clim(2)-zoffset,3);
-    cb.TickLabels   = linspace(clim(1), clim(2),3);
-else
-    cb.Limits       = [clim(1) clim(2)];
-    cb.Ticks        = linspace(clim(1), clim(2),3);
-    cb.TickLabels   = linspace(clim(1), clim(2),3);        
+if opt.showColorbar
+    cb              = colorbar(ax);
+    if opt.useMesh
+        cb.Limits       = [clim(1) clim(2)]-zoffset;
+        cb.Ticks        = linspace(clim(1)-zoffset, clim(2)-zoffset,3);
+        cb.TickLabels   = linspace(clim(1), clim(2),3);
+    else
+        cb.Limits       = [clim(1) clim(2)];
+        cb.Ticks        = linspace(clim(1), clim(2),3);
+        cb.TickLabels   = linspace(clim(1), clim(2),3);
+    end
+    
+    cb.Position([2 4]) = [0.25 0.5];
+    cb.FontSize=11;
 end
-
 if strcmp(subj_id, 'group')
     ax.Units        = 'normalized';
     ax.Position     = [0.05 0.05 0.82 0.9];

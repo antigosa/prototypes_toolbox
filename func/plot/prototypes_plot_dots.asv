@@ -25,8 +25,7 @@ if ~isfield(opt, 'showErrors'); opt.showErrors=1;end
 
 subj_id = opt.subj_id;
 
-% n = length(unique(ProtoTable.subj_id));
-n = length(subj_id);
+n = length(unique(ProtoTable.subj_id));
 if n==1
     if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
@@ -74,12 +73,10 @@ end
 switch opt.whichSpace
     case 'cart'
         prototypes_plot_Resp_cartesian(ProtoTable, dataType, opt);
-        
-        if ~strcmp(dataType, 'errors')
-            l           = legend({'Actual', 'Response'});
-            l.Position  = [0.8 0.9 0.19 0.1];
-            l.Box       = 'Off';
-        end
+        % set(gca, 'YDir', 'reverse')
+        l           = legend({'Actual', 'Response'});
+        l.Position  = [0.8 0.9 0.19 0.1];
+        l.Box       = 'Off';
         % prototypes_plot_setup(ProtoTable, l);
         
         axis off; axis equal;
@@ -94,7 +91,7 @@ switch opt.whichSpace
             case {'Square', 'Rectangle', 'square', 'rectangle'}
                 rectangle('Position', rectPos);
         end
-%         ax          = gca;
+        %         ax          = gca;
         ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
         
         if strcmp(subj_id, 'group')
@@ -148,7 +145,7 @@ switch dataType
         
         if strcmp(dataType, 'errors')
             sh1.Visible='off';
-            sh2.Visible='off';
+            sh1.Visible='off';
         end
 end
 if ~isempty(opt.trials_highlight) || ~isempty(opt.dots_highlight)

@@ -1,4 +1,4 @@
-function corrected_image=undistortBoard(original_image, corners, square_size, plotImage)
+function [corrected_image, tform]=undistortBoard(original_image, corners, square_size, plotImage)
 
 
 
@@ -13,11 +13,6 @@ if nargin<=3
     plotImage=0;
 end
 
-% distorted_points = [x1, y1;
-%                     x2, y2;
-%                     x3, y3;
-%                     x4, y4];
-
 distorted_points = [corners.tl_xy;
                     corners.tr_xy;
                     corners.br_xy;
@@ -30,13 +25,12 @@ corrected_points = [1, 1;
                     square_size, square_size;
                     1, square_size];
                 
-tform = estimateGeometricTransform2D(distorted_points, corrected_points, 'projective');                
-
+tform = estimateGeometricTransform2D(distorted_points, corrected_points, 'projective');
 
 
 corrected_image = imwarp(original_image, tform);
 
-corrected_image=imrotate(corrected_image, 180);
+% corrected_image=imrotate(corrected_image, 180);
 
 if plotImage
     figure;imshow(corrected_image);

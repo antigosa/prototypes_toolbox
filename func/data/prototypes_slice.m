@@ -1,20 +1,47 @@
-function csimap = prototypes_slice(csimap, idx)
+function ProtoData = prototypes_slice(ProtoData, varname, varvals)
 
 
+idx = ismember(ProtoData.Trials.(varname), varvals);
+Trials  = ProtoData.Trials(idx, :);
 
-if isfield(csimap, 'stats')
-    csimap = rmfield(csimap, 'stats');
+if strcmp(varname, 'subj_id')
+    % only subjects can be sliced for csimaps, otherwise, they need to be
+    % recomputed (e.g., if trials are sliced)
+    csimaps = prototypes_slice_csimap(ProtoData.csimaps, varvals);
+        
+else
+    csimaps=[];
 end
+
+ProtoData                = prototypes_ProtoStructure(Trials, csimaps);
+
+
+
+
+function tmp = prototypes_slice_csimap(csimap, varvals)
+% if isfield(csimap, 'stats')
+%     csimap = rmfield(csimap, 'stats');
+% end
 tmp = csimap;
 
 fn = fieldnames(csimap);
+
+idx = find(ismember(csimap.subj_id, varvals));
 
 n = length(idx);
 
 for i = 1:length(fn)
     sz = size(csimap.(fn{i}));
     
-    cur_dim = find(sz == n);
+    if strcmp(fn{i}, 'Properties')
+        continue;
+    end
+    
+    if length(csimap.(fn{i}))==1
+        continue;
+    end
+    
+    cur_dim = length(sz);
     if cur_dim==3
         tmp.(fn{i}) = csimap.(fn{i})(:,:, idx);
     elseif cur_dim==2
@@ -24,11 +51,4 @@ for i = 1:length(fn)
     end
 end
 
-sz = size(csimap.Properties.UserData);
-cur_dim = find(sz == n);
-
-if cur_dim==2
-    tmp.Properties.UserData = csimap.Properties.UserData(:, idx);
-elseif cur_dim==1
-    tmp.Properties.UserData = csimap.Properties.UserData(idx);    
-end
+tmp.Properties.UserData = csimap.Properties.UserData(idx);

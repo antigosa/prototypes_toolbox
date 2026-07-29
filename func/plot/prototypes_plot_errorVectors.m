@@ -1,6 +1,8 @@
 function ax=prototypes_plot_errorVectors(ProtoTable, subj_id)
 % function ax=prototypes_plot_errorVectors(ProtoTable, subj_id)
 % dataType: 'ActDots' | 'RespDots'
+%
+% OLD FUNCTION: USE prototypes_plot_dots
 
 if exist('prototypes_plot_image.m', 'file') ~= 0
      ax_img = prototypes_plot_image(ProtoTable);  
@@ -26,6 +28,8 @@ if ~isgroupData
     end
     
     if ischar(unique(ProtoTable.subj_id))
+        ProtoTable = ProtoTable(contains(ProtoTable.subj_id, subj_id), :);
+    elseif iscell(unique(ProtoTable.subj_id))
         ProtoTable = ProtoTable(contains(ProtoTable.subj_id, subj_id), :);
     else
         ProtoTable = ProtoTable(ProtoTable.subj_id == subj_id, :);

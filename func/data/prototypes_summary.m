@@ -38,7 +38,11 @@ T_summary = vertcat(T_summary{:});
 T_demo = vertcat(T_demo{:});
 T_nTrialsXpart = vertcat(T_nTrialsXpart{:});
 
+T_demo.hand_preference=regexprep(T_demo.hand_preference, '^RH$|^rh$|^r$', 'rh');
+T_demo.hand_preference=regexprep(T_demo.hand_preference, '^LH$|^lh$|^l$', 'lh');
 
+T_demo.gender=regexprep(T_demo.gender, '^M$', 'm');
+T_demo.gender=regexprep(T_demo.gender, '^F$|', 'f');
 
 
 function [T_summary, T_demo, T_nTrialsXpart] = prototypes_summary_helper(T_in, opt)
@@ -46,7 +50,7 @@ function [T_summary, T_demo, T_nTrialsXpart] = prototypes_summary_helper(T_in, o
 verbose     = opt.verbose;
 group_by    = opt.group_by;
 
-T_Unique = unique(T_in(:, horzcat(group_by, {'ParticipantID', 'trial_id'})), 'rows');
+T_Unique = unique(T_in(:, horzcat(group_by, {'ParticipantID', 'trials_id'})), 'rows');
 
 T_nTrialsXpart = groupcounts(T_Unique, horzcat(group_by, {'ParticipantID'}));
 T_nTrialsXpart.Properties.VariableNames{strcmp(T_nTrialsXpart.Properties.VariableNames, 'GroupCount')} = 'N_trials';

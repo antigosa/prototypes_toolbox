@@ -1,17 +1,27 @@
-function DataStat = prototypes_mean(Data)
+function ProtoData = prototypes_mean(ProtoData)
 % function DataStat = prototypes_mean(Data)
 %
 % Data can be:
 % - a ProtoTable
 % - a csm (i.e. a 'cosine similarity map' structure)
 
-if istable(Data)
-    
-    Data        = prototypes_setDotID(Data);
-    DataStat    = prototypes_mean_Responses(Data, {'DotID'});
-else
-    DataStat = prototypes_mean_CosineMaps(Data);
+Trials = ProtoData.Trials;
+
+if ~any(ismember(Trials.Properties.VariableNames, 'dot_id'))
+    Trials    = prototypes_setDotID(Trials);
 end
+TrialsStat    = prototypes_mean_Responses(Trials, {'dot_id'});
+
+
+if isfield(ProtoData, 'csimaps')
+    csimaps     = ProtoData.csimaps;
+    csimapsStat    = prototypes_mean_CosineMaps(csimaps);
+else
+    csimapsStat    = [];
+end
+
+ProtoData.Trials    = TrialsStat;
+ProtoData.csimaps   = csimapsStat;
 
 
 function GroupCosineMaps = prototypes_mean_CosineMaps(SubjectsCosineMaps)
@@ -29,7 +39,7 @@ function TrialsStat = prototypes_mean_Responses(Trials, varNames)
 
 subj_id = unique(Trials.subj_id);
 
-if ~isnumeric(subj_id)    
+if ~isnumeric(subj_id)
     
     % TEST THIS!!!
     
@@ -44,7 +54,7 @@ if ~isnumeric(subj_id)
     Trials.subj_id = Trials.ParticipantID_num;
     
     Trials.ParticipantID_num = [];
-   
+    
 end
 
 varTypes            = prototypes_variablesTypes(Trials);
@@ -56,7 +66,7 @@ varToRemove         = Trials.Properties.VariableNames(varToRemove);
 idx_cellVariables   = ismember(Trials.Properties.VariableNames, varToRemove);
 Trials              = Trials(:, ~idx_cellVariables);
 
-Trials              = sortrows(Trials, {'subj_id', 'DotID'});
+Trials              = sortrows(Trials, {'subj_id', 'dot_id'});
 
 TrialsStat          = grpstats(Trials, varNames, {'nanmean'});
 
