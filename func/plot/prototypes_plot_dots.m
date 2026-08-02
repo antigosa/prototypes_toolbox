@@ -1,5 +1,5 @@
 function [ax, ax_img]=prototypes_plot_dots(ProtoData, dataType, opt)
-% function [ax, ax_img]=prototypes_plot_dots(ProtoData, subj_id, dataType, whichSpace)
+% function [ax, ax_img]=prototypes_plot_dots(ProtoData, dataType, opt)
 % dataType: 'ActDots' | 'RespDots'
 
 ProtoTable = ProtoData.Trials;
@@ -9,7 +9,7 @@ if exist('prototypes_plot_image.m', 'file') ~= 0
 else
     ax_img=[];
 end
-ax=axes;
+% ax=axes;
 
 if nargin<2;dataType='both';end
 if nargin<3;opt = [];end
@@ -23,6 +23,12 @@ if ~isfield(opt, 'dots'); opt.dots=[];end
 if ~isfield(opt, 'dots_highlight'); opt.dots_highlight=[];end
 if ~isfield(opt, 'showErrors'); opt.showErrors=1;end
 if ~isfield(opt, 'showRect'); opt.showRect=1;end
+if ~isfield(opt, 'filter'); opt.filter=[];end
+if ~isfield(opt, 'showLegend'); opt.showLegend=1;end
+if ~isfield(opt, 'useCostumUpdateFunction'); opt.useCostumUpdateFunction=1;end
+if ~isfield(opt, 'showTitle'); opt.showTitle=1;end
+
+
 
 subj_id = opt.subj_id;
 
@@ -46,6 +52,8 @@ if ~isgroupData
     
     % select a participant
     ProtoTable = ProtoTable(ismember(ProtoTable.subj_id, subj_id), :);
+    
+    ProtoData = prototypes_slice(ProtoData, 'subj_id', subj_id);
 end
 
 if ~isempty(opt.trials)
@@ -58,6 +66,7 @@ if ~isempty(opt.trials)
     end
     fprintf('\n')
     ProtoTable = ProtoTable(ismember(ProtoTable.trials_id, opt.trials),:);
+    ProtoData = prototypes_slice(ProtoData, 'trials_id', opt.trials);
 end
 
 if ~isempty(opt.dots)
@@ -69,6 +78,25 @@ if ~isempty(opt.dots)
     end
     fprintf('\n')
     ProtoTable = ProtoTable(ismember(ProtoTable.dot_id, opt.dots),:);
+    ProtoData = prototypes_slice(ProtoData, 'dot_id', opt.dots);
+end
+
+if ~isempty(opt.filter)
+    
+    key     = opt.filter.key;
+    if iscell(key)
+        key     = cell2mat(key);
+    end
+    vals    = opt.filter.vals;
+    idx     = ismember(ProtoTable.(key), vals);        
+    
+    fprintf('Selecting %s:\n', key)
+    for i = 1:length(vals)
+        fprintf('\t%s\n', vals{i});
+    end
+    fprintf('\n')
+    ProtoTable = ProtoTable(idx,:);
+    ProtoData = prototypes_slice(ProtoData, opt.filter.key, opt.filter.vals);
 end
 
 
@@ -76,22 +104,14 @@ switch opt.whichSpace
     case 'cart'
         prototypes_plot_Resp_cartesian(ProtoTable, dataType, opt);
         
-        if ~strcmp(dataType, 'errors')
+        if opt.showLegend && ~strcmp(dataType, 'errors')
             l           = legend({'Actual', 'Response'});
             l.Position  = [0.8 0.9 0.19 0.1];
             l.Box       = 'Off';
-        end
-        % prototypes_plot_setup(ProtoTable, l);
+        end        
         
         axis off; axis equal;
-%         ax_csimap = findobj(gcf, 'Type', 'axes', 'Tag', 'csimap');
-%         
-%         if ~isempty(ax_csimap)
-%             ax.Units='pixels';
-%             ax.Position = [66 66 726 726];
-%             ax.XLim = [0 660];
-%             ax.YLim = [0 660];
-%         end
+        ax          = gca;        
         
         ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
         axis(ProtoTable.Properties.UserData.ShapeRect([1 3 2 4]))
@@ -106,7 +126,7 @@ switch opt.whichSpace
             case {'Square', 'Rectangle', 'square', 'rectangle'}
                 rectangle('Position', rectPos);
         end
-%         ax          = gca;
+
         
         
         if strcmp(subj_id, 'group')
@@ -116,10 +136,7 @@ switch opt.whichSpace
                 ax_img.Units = ax.Units;
                 ax_img.Position = ax.Position;
             end
-        end
-        
-        % fig         = gcf;
-        % fig.Units   = 'centimeters';
+        end        
         
         
     case 'polar'
@@ -127,10 +144,20 @@ switch opt.whichSpace
         
 end
 
+if opt.showTitle
+    subj_id = opt.subj_id;
+    if iscell(subj_id); subj_id=subj_id{1};end
+    title(sprintf('%s', subj_id))
+end
 
-
-
-% prototypes_plot_addTitle(ProtoTable);
+if opt.useCostumUpdateFunction
+    % 1. Get the data cursor mode for the current figure
+    dcm = datacursormode(gcf);
+    set(dcm, 'Enable', 'on');    
+    
+    dcm.UpdateFcn = {@prototypes_UpdateFunc, ProtoData};
+    
+end
 
 
 
@@ -242,6 +269,4 @@ ax.RLim=[0 1.05];
 
 fig=gcf;
 fig.Position = [708 344 500 500];
-% l=legend({'Actual', 'Response'});
-% l.FontSize=12;
-% l.Box = 'Off';
+

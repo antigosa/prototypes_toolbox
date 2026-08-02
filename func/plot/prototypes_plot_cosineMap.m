@@ -6,6 +6,25 @@ function [ax, ax_img] = prototypes_plot_cosineMap(ProtoData, dataType, opt)
 
 if nargin<2;dataType='W_SimixSubject';end
 if nargin<3;opt = [];end
+if ~isfield(opt, 'filter');opt.filter=[];end
+if ~isfield(opt, 'title');opt.title=[];end
+
+if ~isempty(opt.filter)
+    
+    key     = opt.filter.key;
+    if iscell(key)
+        key     = cell2mat(key);
+    end
+    vals    = opt.filter.vals;
+    
+    fprintf('Selecting %s:\n', key)
+    for i = 1:length(vals)
+        fprintf('\t%s\n', vals{i});
+    end
+    fprintf('\n')
+    ProtoData = prototypes_slice(ProtoData, opt.filter.key, opt.filter.vals);
+end
+
 
 csm = ProtoData.csimaps;
 
@@ -16,6 +35,7 @@ if ~isfield(opt, 'showRect'); opt.showRect=1;end
 if ~isfield(opt, 'showColorbar'); opt.showColorbar=1;end
 if ~isfield(opt, 'showErrors'); opt.showErrors=0;end
 if ~isfield(opt, 'plotShapeContainer'); opt.plotShapeContainer=0;end
+if ~isfield(opt, 'showTitle'); opt.showTitle=1;end
 
 
 subj_id = opt.subj_id;
@@ -129,33 +149,54 @@ if opt.showColorbar
         cb.TickLabels   = linspace(clim(1), clim(2),3);
     end
     
-    cb.Position([2 4]) = [0.25 0.5];
-    cb.FontSize=11;
-end
-if strcmp(subj_id, 'group')
-    ax.Units        = 'normalized';
-    ax.Position     = [0.05 0.05 0.82 0.9];
-    
-    if ~isempty(ax_img)
-        ax_img.Units        = 'normalized';
-        ax_img.Position     = [0.05 0.05 0.82 0.9];
-    end
+%     tmp_position = ax.Position;
+    cb.Position([2 4])  = [0.25 0.5];
+    cb.FontSize         = 11;
+%     ax.Position=tmp_position;
     
 end
+% if strcmp(subj_id, 'group')
+%     ax.Units        = 'normalized';
+%     ax.Position     = [0.05 0.05 0.82 0.9];
+%     
+%     if ~isempty(ax_img)
+%         ax_img.Units        = 'normalized';
+%         ax_img.Position     = [0.05 0.05 0.82 0.9];
+%     end
+%     
+% end
 
-if opt.showErrors      
+if opt.showErrors
     subjProtoData = prototypes_slice(ProtoData, 'subj_id', subj_id);
-    ProtoTable = subjProtoData.Trials; 
+    ProtoTable = subjProtoData.Trials;
     
     
     ActDots         = ProtoTable.ActualDots_xy + abs(csm.Properties.UserData(idx_participant).ShapeContainerRect([1 2]));
-%     RespDots        = ProtoTable.ResponseDots_xy;    
+    %     RespDots        = ProtoTable.ResponseDots_xy;
     
     errorVector     = ProtoTable.errorXY;
     hold on;
     
     q               = quiver(ActDots(:,1), ActDots(:,2), errorVector(:,1), errorVector(:,2),0); % Use S=0 to plot the arrows without the automatic scaling.
     q.Color         = 'k';
-    q.LineWidth     = 1;    
+    q.LineWidth     = 1;
+    
+end
+
+if opt.showTitle
+    
+    if isempty(opt.title)
+        tit = opt.subj_id;
+        if iscell(tit); tit=tit{1};end
+    else
+        if isfield(ProtoData, opt.title)
+            tit = ProtoData.(opt.title);
+            if iscell(tit); tit=tit{1};end
+        else
+            tit = opt.title;
+            if iscell(tit); tit=tit{1};end
+        end
         
+    end
+    title(sprintf('%s', tit))
 end

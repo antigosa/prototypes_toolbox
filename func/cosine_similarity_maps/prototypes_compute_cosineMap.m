@@ -62,13 +62,13 @@ for s = 1:nsubj
         csm.SimixSubject = zeros(size(csm_subj{s}.SimixSubject, 1), size(csm_subj{s}.SimixSubject, 2), nsubj);
         csm.W_SimixSubject = zeros(size(csm_subj{s}.W_SimixSubject, 1), size(csm_subj{s}.W_SimixSubject, 2), nsubj);
     end
-    csm.SimixSubject(:, :, s) = csm_subj{s}.SimixSubject;
+    csm.SimixSubject(:, :, s)   = csm_subj{s}.SimixSubject;
     csm.W_SimixSubject(:, :, s) = csm_subj{s}.W_SimixSubject;
+    csm.ntrials(s)              = size(Trial_subj,1);
+    csm.alphavalue(s)           = alphavalue;
 end
-csm.ParticipantID         = unique(ProtoTable.ParticipantID);
-csm.Properties.UserData   = ProtoTable.Properties.UserData;
-csm.alphavalue            = alphavalue;
-
+csm.ParticipantID           = unique(ProtoTable.ParticipantID);
+csm.Properties.UserData     = ProtoTable.Properties.UserData;
 
 
 function csm = prototypes_compute_cosineMap_aSubj(ProtoTable, alphavalue, nproc, opt)

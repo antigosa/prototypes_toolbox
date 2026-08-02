@@ -24,7 +24,7 @@ end
 % ProtoData.csimaps   = csimapsStat;
 % ProtoData.nSubjects = 1;
 
-TrialsStat.experiment(:) = unique(Trials.experiment);
+TrialsStat.experiment(:)    = ProtoData.experiment;
 TrialsStat.stimulus_type(:) = unique(Trials.stimulus_type);
 TrialsStat(:, {'breaks_id', 'blocks_id', 'Rectcoord_FIRST', 'Rectcoord_SECOND'})=[];
 TrialsStat.trials_id(:) = 1:size(TrialsStat, 1);
@@ -70,7 +70,7 @@ end
 
 varTypes            = prototypes_variablesTypes(Trials);
 
-varToRemove         = ismember(varTypes, {'cell', 'char'});
+varToRemove         = ismember(varTypes, {'cell', 'char', 'string'});
 
 varToRemove         = Trials.Properties.VariableNames(varToRemove);
 

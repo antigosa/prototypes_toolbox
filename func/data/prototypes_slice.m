@@ -5,6 +5,8 @@ if nargin<4;opt=[];end
 
 if ~isfield(opt, 'sliceCSImaps'); opt.sliceCSImaps=1;end
 
+if iscell(varname);varname=varname{1};end
+
 idx = ismember(ProtoData.Trials.(varname), varvals);
 Trials  = ProtoData.Trials(idx, :);
 
@@ -17,7 +19,7 @@ else
     csimaps=[];
 end
 
-ProtoData                = prototypes_ProtoStructure(Trials, csimaps);
+ProtoData                = prototypes_ProtoStructure(Trials, csimaps, struct('computeSummary', 0));
 
 
 

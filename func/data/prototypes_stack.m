@@ -3,8 +3,6 @@ function ProtoData = prototypes_stack(ProtoData_cell)
 % 
 % Stack two or more prototype tables or cosine maps structures
 
-
-
 Trials = stack_T(ProtoData_cell);
 
 if isfield(ProtoData_cell{1}, 'csimaps')
@@ -25,6 +23,8 @@ D_out = table;
 
 for i=1:ncells
     
+    D_in{i}.Trials.Properties.RowNames(:)=[];
+    
     D_out = [D_out; D_in{i}.Trials];
 end
 
@@ -42,9 +42,9 @@ for i=1:ncells
         fn = setdiff(fn, 'Properties');
         
         for j = 1:length(fn)
-            if length(size(D_out.(fn{j}))) == 3
+            if (length(size(D_out.(fn{j}))) == 3 || length(size(D_out.(fn{j}))) == 2) & ~any(size(D_out.(fn{j}))==1)
                 D_out.(fn{j}) = cat(3, D_out.(fn{j}), D_in{i}.csimaps.(fn{j}));
-            elseif size(D_out.ParticipantID,1)==1
+            elseif size(D_out.subj_id,1)==1
                 D_out.(fn{j}) = horzcat(D_out.(fn{j}), D_in{i}.csimaps.(fn{j}));
             end
         end
