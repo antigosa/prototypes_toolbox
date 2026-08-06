@@ -1,12 +1,13 @@
 function ax=prototypes_plot_image(Trials)
 % IMAGE MUST HAVE ALPHA CHANNEL
-if isfield(Trials.Properties.UserData, 'StimulusFileName')&~isempty(Trials.Properties.UserData.StimulusFileName)
+if isfield(Trials.Properties.UserData, 'StimulusFileName')&~isempty(Trials.Properties.UserData.StimulusFileName{1})&~strcmp(Trials.Properties.UserData.StimulusFileName, '')
     
-    if ischar(Trials.Properties.UserData.StimulusFileName)
-        [img, ~, transparency] = imread(Trials.Properties.UserData.StimulusFileName);
+    if iscell(Trials.Properties.UserData.StimulusFileName)
+        [img, ~, transparency] = imread(Trials.Properties.UserData.StimulusFileName{1});
         stimulus_img.img = img;
         stimulus_img.transparency = transparency;
     else
+        % is a matrix
         stimulus_img.img   = Trials.Properties.UserData.StimulusFileName;
     end
     
@@ -21,7 +22,7 @@ if isfield(Trials.Properties.UserData, 'StimulusFileName')&~isempty(Trials.Prope
         ax_img(1).AlphaData = stimulus_img.transparency.*0.1;
         colormap(ax, 'gray');
     end
-    
+    hold on; 
 else
     ax=[];
     

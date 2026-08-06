@@ -11,7 +11,7 @@ if ~any(ismember(Trials.Properties.VariableNames, 'dot_id'))
     Trials    = prototypes_setDotID(Trials);
 end
 TrialsStat    = prototypes_mean_Responses(Trials, {'dot_id'});
-
+TrialsStat    = prototypes_compute_errorVectors(TrialsStat);
 
 if isfield(ProtoData, 'csimaps')
     csimaps     = ProtoData.csimaps;
@@ -26,7 +26,7 @@ end
 
 TrialsStat.experiment(:)    = ProtoData.experiment;
 TrialsStat.stimulus_type(:) = unique(Trials.stimulus_type);
-TrialsStat(:, {'breaks_id', 'blocks_id', 'Rectcoord_FIRST', 'Rectcoord_SECOND'})=[];
+TrialsStat(:, {'break_id', 'block_id', 'Rectcoord_FIRST', 'Rectcoord_SECOND'})=[];
 TrialsStat.trials_id(:) = 1:size(TrialsStat, 1);
 
 opt = [];

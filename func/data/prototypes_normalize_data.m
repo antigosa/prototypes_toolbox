@@ -1,4 +1,4 @@
-function ProtoTable = prototypes_normalize_data(ProtoTable, dim)
+function ProtoTable = prototypes_normalize_data(ProtoTable, opt)
 % function ProtoTable = prototypes_normalize_data(ProtoTable, dim)
 %
 % Target and Response dots will be scaled in axis [-1 1 -1 1];
@@ -21,7 +21,12 @@ function ProtoTable = prototypes_normalize_data(ProtoTable, dim)
 % RT 20200915
 
 
-if nargin==1;dim=[];end
+if nargin<2;opt=[];end
+if ~isfield(opt, 'dim'); opt.dim=[];end
+if ~isfield(opt, 'centreOnly'); opt.centreOnly=0;end
+
+
+dim=opt.dim;
 
 if isfield(ProtoTable.Properties.UserData, 'orig')
     warning('this data seems already normalized! exiting...');
@@ -57,19 +62,19 @@ switch dim
         RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.ShapeRect(4);
         RectWidth   = RectHeight;
         
-    case 'both'        
+    case 'both'
         RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.ShapeRect(3);
         RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.ShapeRect(4);
 end
 
 
-
-ActualDots_xy(:,1) = ActualDots_xy(:,1)./(RectWidth/2);
-ActualDots_xy(:,2) = ActualDots_xy(:,2)./(RectHeight/2);
-
-RespDots_xy(:,1) = RespDots_xy(:,1)./(RectWidth/2);
-RespDots_xy(:,2) = RespDots_xy(:,2)./(RectHeight/2);
-
+if ~opt.centreOnly
+    ActualDots_xy(:,1) = ActualDots_xy(:,1)./(RectWidth/2);
+    ActualDots_xy(:,2) = ActualDots_xy(:,2)./(RectHeight/2);
+    
+    RespDots_xy(:,1) = RespDots_xy(:,1)./(RectWidth/2);
+    RespDots_xy(:,2) = RespDots_xy(:,2)./(RectHeight/2);
+end
 
 % update table
 ProtoTable.ActualDots_xy        = ActualDots_xy;
@@ -77,58 +82,38 @@ ProtoTable.ResponseDots_xy      = RespDots_xy;
 
 ProtoTable.Properties.UserData.orig.ShapeRect           = ProtoTable.Properties.UserData.ShapeRect;
 ProtoTable.Properties.UserData.orig.ShapeContainerRect  = ProtoTable.Properties.UserData.ShapeContainerRect;
+ProtoTable.Properties.UserData.orig.centreOnly          = opt.centreOnly;
+
 
 switch dim
     case {1}
-        ProtoTable.Properties.UserData.ShapeRect                = [-1 -0.5 1 0.5];        
+        % TO COMPLETE
+        ProtoTable.Properties.UserData.ShapeRect                = [-1 -0.5 1 0.5];
         
     case {2}
+        % TO COMPLETE
         ProtoTable.Properties.UserData.ShapeRect                = [-0.5 -1 0.5 1];
         
     case 'both'
-        ProtoTable.Properties.UserData.ShapeRect                = [-1 -1 1 1];
+        if ~opt.centreOnly
+            ProtoTable.Properties.UserData.ShapeRect                = [-1 -1 1 1];
+        else
+            ProtoTable.Properties.UserData.ShapeRect                = ProtoTable.Properties.UserData.ShapeRect-[ProtoTable.Properties.UserData.ShapeRect(3)/2 ProtoTable.Properties.UserData.ShapeRect(4)/2 ProtoTable.Properties.UserData.ShapeRect(3)/2 ProtoTable.Properties.UserData.ShapeRect(4)/2];
+        end
         
 end
-
 ProtoTable.Properties.UserData.ShapeContainerRect       = ProtoTable.Properties.UserData.ShapeRect + ProtoTable.Properties.UserData.ShapeRect.*0.10;
 
 if any(strcmp(ProtoTable.Properties.VariableNames, 'errorXY'))
     ProtoTable = prototypes_compute_errorVectors(ProtoTable);
 end
 
-% if any(strcmp(ProtoTable.Properties.VariableNames, 'ActualDots_polar'))
-%     ProtoTable = prototypes_compute_polarData(ProtoTable);
-% end
-%
-% if isfield(ProtoTable.Properties.UserData, 'kmeans')
-%     RectWidth = RectWidth(1);
-%     RectHeight = RectHeight(1);
-%     dataTypes = fieldnames(ProtoTable.Properties.UserData.kmeans);
-%     for f = 1:length(dataTypes)
-%         ProtoTable.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid = ProtoTable.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid-[RectWidth/2 RectHeight/2];
-%         ProtoTable.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid = ProtoTable.Properties.UserData.kmeans.(dataTypes{f}).clusterInfo.Centroid./[RectWidth/2 RectHeight/2];
-%     end
-% end
-%
-% if isfield(ProtoTable.Properties.UserData, 'Models')
-%     RectWidth = RectWidth(1);
-%     RectHeight = RectHeight(1);
-%     model_list = fieldnames(ProtoTable.Properties.UserData.Models);
-%
-%     % I SHOULD DO THIS FOR ALL PARTICIPANTS!!
-%     for m = 1:numel(model_list)
-%         prototypes_pos = (ProtoTable.Properties.UserData.Models.(model_list{m}).param.prototypes{1}-[RectWidth/2 RectHeight/2]);
-%         prototypes_pos = prototypes_pos./([RectWidth/2 RectHeight/2]);
-%         ProtoTable.Properties.UserData.Models.(model_list{m}).param.prototypes{1} = prototypes_pos;
-%
-%         if isfield(ProtoTable.Properties.UserData.Models.(model_list{m}), 'PredictedResp_xy')
-%             PredictedResp_xy = (ProtoTable.Properties.UserData.Models.(model_list{m}).PredictedResp_xy-[RectWidth/2 RectHeight/2]);
-%             PredictedResp_xy = PredictedResp_xy./([RectWidth/2 RectHeight/2]);
-%             ProtoTable.Properties.UserData.Models.(model_list{m}).PredictedResp_xy = PredictedResp_xy;
-%         end
-%
-%
-%     end
-%
-% end
+if ismember('prototypeXY', ProtoTable.Properties.VariableNames)
+    ProtoTable.prototypeXY = (ProtoTable.prototypeXY -[RectWidth/2 RectHeight/2]);
+    
+    if ~opt.centreOnly
+        ProtoTable.prototypeXY(:,1) = ProtoTable.prototypeXY(:,1)./(RectWidth/2);
+        ProtoTable.prototypeXY(:,2) = ProtoTable.prototypeXY(:,2)./(RectHeight/2);
+    end
+end
 

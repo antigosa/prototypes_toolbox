@@ -49,25 +49,28 @@ switch dim
         RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
         RectWidth   = RectHeight;
         
-    case 'both'        
+    case 'both'
         RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
         RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
 end
 
 
+centreOnly = ProtoTable.Properties.UserData.orig.centreOnly;
 
-ActualDots_xy(:,1)  = ActualDots_xy(:,1).*(RectWidth/2);
-ActualDots_xy(:,2)  = ActualDots_xy(:,2).*(RectHeight/2);
 
-RespDots_xy(:,1)    = RespDots_xy(:,1).*(RectWidth/2);
-RespDots_xy(:,2)    = RespDots_xy(:,2).*(RectHeight/2);
-
+if ~centreOnly
+    ActualDots_xy(:,1)  = ActualDots_xy(:,1).*(RectWidth/2);
+    ActualDots_xy(:,2)  = ActualDots_xy(:,2).*(RectHeight/2);
+    
+    RespDots_xy(:,1)    = RespDots_xy(:,1).*(RectWidth/2);
+    RespDots_xy(:,2)    = RespDots_xy(:,2).*(RectHeight/2);
+end
 
 
 % center data to original space
 
-RectWidth   = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
-RectHeight  = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
+RectWidth           = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(3);
+RectHeight          = ones(size(ProtoTable, 1), 1)*ProtoTable.Properties.UserData.orig.ShapeRect(4);
 ActualDots_xy       = ActualDots_xy+[RectWidth/2 RectHeight/2];
 RespDots_xy         = RespDots_xy+[RectWidth/2 RectHeight/2];
 
@@ -79,7 +82,16 @@ ProtoTable.ResponseDots_xy      = RespDots_xy;
 ProtoTable.Properties.UserData.ShapeRect            = ProtoTable.Properties.UserData.orig.ShapeRect;
 ProtoTable.Properties.UserData.ShapeContainerRect   = ProtoTable.Properties.UserData.orig.ShapeContainerRect;
 
+ProtoTable.Properties.UserData = rmfield(ProtoTable.Properties.UserData, 'orig');
 
 if any(strcmp(ProtoTable.Properties.VariableNames, 'errorXY'))
     ProtoTable = prototypes_compute_errorVectors(ProtoTable);
+end
+
+if ismember('prototypeXY', ProtoTable.Properties.VariableNames)
+    if ~centreOnly
+        ProtoTable.prototypeXY(:,1) = ProtoTable.prototypeXY(:,1).*(RectHeight/2);
+        ProtoTable.prototypeXY(:,2) = ProtoTable.prototypeXY(:,2).*(RectWidth/2);
+    end
+    ProtoTable.prototypeXY = ProtoTable.prototypeXY+[RectWidth/2 RectHeight/2];
 end

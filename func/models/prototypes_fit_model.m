@@ -4,7 +4,7 @@ function param = prototypes_fit_model(ProtoTable, modelfun, param0, opt)
 % default model: prototypes_model_CAM
 
 if nargin ==1 || isempty(modelfun); modelfun=@prototypes_model_CAM; end
-if nargin<3; opt=[];end
+if nargin<4; opt=[];end
 if ~isfield(opt, 'fit_wOnly'); opt.fit_wOnly=0;end
 
 if ~isfield(opt, 'DisplayIter'); opt.DisplayIter='Off';end
@@ -28,7 +28,7 @@ switch func2str(modelfun)
         
     case 'prototypes_model_CAM'
         % This is the simplest original model by Huttenlocher et al, 1991.
-        % It does have 2 parameters:
+        % It does have 3 parameters:
         % w: is the weight given to the fine-grain memory
         % P: the prototypes locations
         % ST: the trunctation parameter
@@ -36,7 +36,9 @@ switch func2str(modelfun)
         % note that the prototypes are treated as separated parameters
         
 %         param_init = [Param0.w Param0.Prototype(:)' Param0.stdTRB];
-        param_init = [param0.w reshape(param0.prototypes, 1, [])];
+%         param_init = [param0.Param0.w reshape(param0.Param0.Prototype, 1, [])];
+        param_init = [unique(param0.w_theta) unique(param0.w_r) reshape(param0.prototypesXY, 1, [])];
+
         if opt.fit_wOnly
             param_init = unique(Param0.w);
         end        
@@ -78,12 +80,13 @@ switch func2str(modelfun)
         end
     
     case 'prototypes_model_CAM'
-        param.w                 = fP(1);
+        param.w_theta               = repmat(fP(1), size(param,1),1);
+        param.w_r                   = repmat(fP(2), size(param,1),1);
 %         param.Prototype         = {reshape(fP(2:3), 1, 2)};
 %         param.stdTRB            = fP(end);
         if ~opt.fit_wOnly
 %             param.Prototype         = mat2cell(reshape(fP(2:end), [], 2), ones(size(param,1),1),2);
-            param.prototypes        = reshape(fP(2:end), [], 2);
+            param.prototypesXY    = reshape(fP(3:end), [], 2);
         else
 %             param.Prototype         = mat2cell(reshape(vertcat(opt.Param0.Prototype{:}), [], 2), ones(size(param,1),1),2);
 %             param.Prototype         = mat2cell(reshape(vertcat(opt.Param0.Prototype{:}), [], 2), ones(size(param,1),1),2);

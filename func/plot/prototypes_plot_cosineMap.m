@@ -8,6 +8,7 @@ if nargin<2;dataType='W_SimixSubject';end
 if nargin<3;opt = [];end
 if ~isfield(opt, 'filter');opt.filter=[];end
 if ~isfield(opt, 'title');opt.title=[];end
+if ~isfield(opt, 'errorsColour');opt.errorsColour=[0 0 0];end
 
 if ~isempty(opt.filter)
     
@@ -43,7 +44,9 @@ clim = opt.clim;
 
 % n = length(unique(csm.subj_id));
 n = length(subj_id);
-if n==1
+if n>1
+    error('Please select one participant using the option .subj_id'); 
+else
     if strcmp(unique(csm.subj_id), 'group')
         isgroupData = 1;
     else
@@ -63,7 +66,12 @@ else
     CSI_map = csm.(dataType);
 end
 
-idx_participant = find(ismember(csm.subj_id, subj_id));
+% CHECK THIS!!
+if length(csm.Properties.UserData)>1
+    idx_participant = find(ismember(csm.subj_id, subj_id));    
+else
+    idx_participant = 1;
+end
 
 if opt.useMesh
     % I don't remember why I used the mesh...
@@ -131,7 +139,7 @@ if opt.showRect
             rectangle('Position', rectPos, 'Curvature', [1 0.9]);
     end
 end
-ax.YDir         = prototypes_get_metadata(csm, 'YDir');
+ax.YDir         = cell2mat(prototypes_get_metadata(csm, 'YDir'));
 if ~isempty(ax_img)
     cb_im = colorbar(ax_img);
     cb_im.Visible='Off';
@@ -180,6 +188,8 @@ if opt.showErrors
     q               = quiver(ActDots(:,1), ActDots(:,2), errorVector(:,1), errorVector(:,2),0); % Use S=0 to plot the arrows without the automatic scaling.
     q.Color         = 'k';
     q.LineWidth     = 1;
+    q.Color         = opt.errorsColour;
+    
     
 end
 

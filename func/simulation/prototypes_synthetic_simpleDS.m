@@ -1,5 +1,5 @@
-function ProtoTable = prototypes_synthetic_simpleDS(ndotsOrMat, figure_size, sd, nsubj, simulateBias, seed)
-% function ProtoTable = prototypes_synthetic_simpleDS(ndotsOrMat, figure_size, sd, nsubj, simulateBias, seed)
+function ProtoTable = prototypes_synthetic_simpleDS(ndotsOrMat, Shape, figure_size, sd, nsubj, simulateBias, seed)
+% function ProtoTable = prototypes_synthetic_simpleDS(ndotsOrMat, Shape, figure_size, sd, nsubj, simulateBias, seed)
 %
 % This function provides a very basic simulation of the responses. You can
 % just decide if responses will be biased (simulateBias=1) or not (just
@@ -34,9 +34,9 @@ function ProtoTable = prototypes_synthetic_simpleDS(ndotsOrMat, figure_size, sd,
 %
 % 20200831 - RT
 rng('default')
-if nargin==3;nsubj=1;simulateBias = 1;rng('shuffle');end
-if nargin==4;simulateBias = 1;rng('shuffle');end
-if nargin==5; rng('shuffle'); elseif nargin==6; rng(seed); end
+if nargin<5;nsubj=1;end
+if nargin<6;simulateBias = 1;end
+if nargin<7; rng('shuffle'); elseif nargin==8; rng(seed); end
 
 % sd is given as percentage, and needs to be converted in pixels. There is
 % one sd for each dimension
@@ -63,11 +63,7 @@ end
 % add fields that define a prototable
 ProtoTable = prototypes_prototable(ProtoTable);
 ProtoTable = prototypes_set_metadata(ProtoTable, 'Experiment', 'Synthetic data');
-if figure_size(1) ~= figure_size(2)
-    ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusType', 'Rectangle');
-else
-    ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusType', 'Square');
-end
+ProtoTable = prototypes_set_metadata(ProtoTable, 'StimulusType', Shape);
 ProtoTable = prototypes_set_metadata(ProtoTable, 'ShapeRect', [0 0 figure_size]);
 ProtoTable = prototypes_set_metadata(ProtoTable, 'ShapeContainerRect', [0-figure_size(1)*.1 0-figure_size(2)*.1 figure_size(1)+figure_size(1)*.1 figure_size(2)+figure_size(2)*.1]);
 
@@ -79,7 +75,26 @@ ProtoTable.Gender     = cell(length(ProtoTable.Age), 1);
 ProtoTable.Gender(Gender==1)     = {'Female'};
 ProtoTable.Gender(Gender==2)     = {'Male'};
 
+oldVarNames = {'ParticipantID', 'Trial', 'DotID', 'Block', 'Age', 'Gender'};
+newVarNames = {'subj_id', 'trial_id', 'dot_id', 'block_id', 'age', 'gender'};
+ProtoData.Trials = ProtoTable;
+ProtoData=prototypes_update_varNames(ProtoData, oldVarNames, newVarNames);
+ProtoTable = ProtoData.Trials;
 
+ProtoTable.RectWidth(:) = figure_size(1);
+ProtoTable.RectHeight(:) = figure_size(2);
+
+
+fn = fieldnames(ProtoTable.Properties.UserData);
+
+% isFieldChar = zeros(1, length(fn));
+for i = 1:length(fn)
+    if ischar(ProtoTable.Properties.UserData.(fn{i}))
+        ProtoTable.Properties.UserData.(fn{i}) = {ProtoTable.Properties.UserData.(fn{i})};
+    end
+end
+
+ProtoTable.experiment(:) = {'synthetic'};
 
 
 function ProtoTable = prototypes_synthetic_simpleDS_aSubj(ndotsOrMat, figure_size, sd1, sd2, subjNum, simulateBias)

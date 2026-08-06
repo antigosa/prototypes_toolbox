@@ -1,9 +1,12 @@
-function xy = prototypes_generate_grid_withImage(img, mask, n_dots_x, n_dots_y, grid_offset)
-% function prototypes_generate_grid_withImage(img, mask, n_dots_x, n_dots_y, grid_offset)
+function xy = prototypes_generate_grid_withImage(img, mask, n_dots_x, n_dots_y, grid_offset, dot_noise)
+% function xy = prototypes_generate_grid_withImage(img, mask, n_dots_x, n_dots_y, grid_offset, dot_noise)
+%
+% NOTE: grid_offset is not used at the moment, check
+% prototypes_generate_grid
+
+plotGrid = 0;
 
 close all;
-
-
 
 % be sure that the randomization is fine
 rng('shuffle');
@@ -20,13 +23,15 @@ im_mask = imread(mask);
 im_mask = rgb2gray(im_mask);
 % im_mask(im_mask>0)=255;
 
-% 
+%
 % grid_step       = 20;
 grid_start      = 5; % it should be bigger than grid_offset so the borders are fine
 % grid_offset     = 8;
 % grid_dim        = 200;
 % im = imtranslate(im, [grid_dim, grid_dim],'OutputView','full','FillValues',255);
-figure; imagesc(im_stim);axis image;colormap('gray');
+if plotGrid
+    figure; imagesc(im_stim);axis image;colormap('gray');
+end
 % xlim([0 square_dim_x]);ylim([0 square_dim_y]);
 
 
@@ -46,9 +51,9 @@ new_xy_x = reshape(repmat(x, length(y),1),1,[])';
 new_xy = [new_xy_x, new_xy_y];
 
 % new_xy = new_xy - grid_dim/2;
-
-hold on; scatter(new_xy(:,1), new_xy(:,2), 'Filled'); axis image;
-
+if plotGrid
+    hold on; scatter(new_xy(:,1), new_xy(:,2), 'Filled'); axis image;
+end
 
 % =========================================================================
 % exlude dots that are outside the mask (a circle or a square, for example)
@@ -59,7 +64,10 @@ hold on; scatter(new_xy(:,1), new_xy(:,2), 'Filled'); axis image;
 % im(im>200)=NaN;
 % imshow(im);
 im_mask(im_mask>0)=255;
-figure;imagesc(im_mask);axis image;colormap('gray')
+
+if plotGrid
+    figure;imagesc(im_mask);axis image;colormap('gray')
+end
 
 % 255 means that the dots within the area (the person in this case) will
 % be excluded
@@ -67,7 +75,9 @@ offset=10;
 [xy, dotOutOfCircle]=protoperispace_refine_grid(im_mask, new_xy, 255, offset);
 % [dotOutOfCircle, xy] = protoperispace_check_dots(im, new_xy, 255); % 255
 
-hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+if plotGrid
+    hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+end
 fprintf('dot out of circle: %d\n', dotOutOfCircle);
 
 
@@ -79,20 +89,22 @@ fprintf('dot out of circle: %d\n', dotOutOfCircle);
 % be excluded
 [xy, dotInPerson]=protoperispace_refine_grid(im_stim, xy, 0);
 
-hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+if plotGrid
+    hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+end
 fprintf('dot in person: %d\n', dotInPerson);
 
 %%
 n_dots = size(new_xy,1);
 
 % offset for dots that are not at the border
-new_xy=xy+random('norm', 0, grid_offset, n_dots, 2);
+new_xy=xy+random('norm', 0, dot_noise, n_dots, 2);
 
 [~, dotInPerson]=protoperispace_refine_grid(im_stim, new_xy, 0);
 
 iter=1;
 while dotInPerson && iter<1000
-    new_xy=xy+random('norm', 0, grid_offset, n_dots, 2);
+    new_xy=xy+random('norm', 0, dot_noise, n_dots, 2);
     [~, dotInPerson]=protoperispace_refine_grid(im_stim, new_xy, 0);
     iter=iter+1;
     clc; fprintf('iteration: %d\n', iter);
@@ -126,13 +138,13 @@ end
 
 % shape_width = size(im_stim, 2);
 % shape_height = size(im_stim, 1);
-% 
+%
 % % window size in pixels
 % [screen_width_px, screen_height_px]=Screen('WindowSize', 1 );
-% 
+%
 % % window size in mm
 % [screen_width_mm, screen_height_mm]=Screen('DisplaySize', 1);
-% 
+%
 % save(sprintf('TrialList_imsize%dx%d_ndots%d_nblocks%d_offset%d_withImage', square_dim_x, square_dim_y, n_dots, multOf, grid_offset), 'xy',...
 % 'shape_width', 'shape_height', 'screen_width_px', 'screen_height_px');
 
@@ -197,7 +209,7 @@ for d = 1:ndots
     
     %    if im(curdot(2), curdot(1))==val2remove
     if any(any(im(curvec(:,2), curvec(:,1))==val2remove))
-%         if any(any(im(curvec(:,2), curvec(:,1))==val2remove))
+        %         if any(any(im(curvec(:,2), curvec(:,1))==val2remove))
         dotOutOfCircle=dotOutOfCircle+1;
         xy(d,:)=NaN;
     end
@@ -217,7 +229,7 @@ rho1 = round(sqrt(FigureHeight^2 + FigureWidth^2))/2;
 
 axis([0 FigureHeight 0 FigureWidth]);
 fig=gcf;
-fig.Position=[-750   276   560   420]; 
+fig.Position=[-750   276   560   420];
 [x, y] = pol2cart(theta1, rho1);
 
 line([x0 x+x0], [y0 y+y0], 'Color', col, 'LineWidth', 2, 'LineStyle', listy);axis([0 FigureWidth 0 FigureHeight])

@@ -10,7 +10,7 @@ function csm = prototypes_compute_cosineMap(ProtoTable, alphavalue, nproc, opt)
 % ProtoTable: 
 % - a prototable
 % - mandatory fields:
-% -- .ParticipantID
+% -- .subj_id
 % -- .ActualDots_xy
 % -- .ResponseDots_xy
 % -- .Properties.UserData.ShapeContainerRect
@@ -42,20 +42,24 @@ function csm = prototypes_compute_cosineMap(ProtoTable, alphavalue, nproc, opt)
 %   cosine similarity values (weighted)
 
 % set default input
-if ~exist('nproc', 'var'); nproc=1;end
-if ~exist('opt', 'var'); opt=[];end
+if nargin<3;  nproc=1;end
+if nargin<4;  opt=[];end
+if ~isfield(opt, 'addvars'); opt.addvars = [];end
 
 % get list of participants
-subjlist    = unique(ProtoTable.ParticipantID);
+subjlist    = unique(ProtoTable.subj_id);
 nsubj       = length(subjlist);
 
+if ~isempty(opt.addvars)
+    nvars = length(opt.addvars);
+end
 
 csm_subj = cell(1, nsubj);
 
 for s = 1:nsubj
     subjNum = subjlist(s);
     %ProtoTable_subj{s} = prototypes_select_subjects(ProtoTable, subjNum);
-    Trial_subj = ProtoTable(ismember(ProtoTable.ParticipantID,subjNum), :);
+    Trial_subj = ProtoTable(ismember(ProtoTable.subj_id,subjNum), :);
     csm_subj{s} = prototypes_compute_cosineMap_aSubj(Trial_subj, alphavalue, nproc, opt);
     
     if s == 1
@@ -66,18 +70,26 @@ for s = 1:nsubj
     csm.W_SimixSubject(:, :, s) = csm_subj{s}.W_SimixSubject;
     csm.ntrials(s)              = size(Trial_subj,1);
     csm.alphavalue(s)           = alphavalue;
+    if ~isempty(opt.addvars)
+        
+        for i = 1:nvars
+            csm.(opt.addvars{i})(s) = unique(Trial_subj.(opt.addvars{i}));
+        end
+        
+    end
+    
 end
-csm.ParticipantID           = unique(ProtoTable.ParticipantID);
+% csm.subj_id           = unique(ProtoTable.subj_id)';
+csm.subj_id                 = unique(ProtoTable.subj_id)';
 csm.Properties.UserData     = ProtoTable.Properties.UserData;
 
 
 function csm = prototypes_compute_cosineMap_aSubj(ProtoTable, alphavalue, nproc, opt)
 
-if nargin==2;nproc=1;end
+if nargin<3; nproc=1;end
+if nargin<4; opt=[];end
+if ~isfield(opt, 'pixStep'); opt.pixStep = 1;end
 
-if ~exist('opt', 'var') || isempty(opt)
-    opt.pixStep = 1;
-end
 pixStep = opt.pixStep;
 
 X0      = ProtoTable.Properties.UserData.ShapeContainerRect(1);
@@ -94,8 +106,8 @@ if nproc==1
     
 else
         
-    if isnumeric(unique(ProtoTable.ParticipantID))
-        clc;fprintf('Computing cosine map for subject %d using %d processors...', unique(ProtoTable.ParticipantID),  nproc);
+    if isnumeric(unique(ProtoTable.subj_id))
+        clc;fprintf('Computing cosine map for subject %d using %d processors...', unique(ProtoTable.subj_id),  nproc);
     else
         clc;fprintf('Computing cosine map for the group using %d processors...',  nproc);
     end
@@ -170,8 +182,8 @@ npixels                 = FigureHeight*FigureWidth;
 
 n_tot_length            = round((FigureHeight*FigureWidth)/round(npixels/10))+1;
 
-if isnumeric(unique(ProtoTable.ParticipantID))
-    progress            = sprintf('Computing cosine similarity index map for subject %d: [', unique(ProtoTable.ParticipantID));
+if isnumeric(unique(ProtoTable.subj_id))
+    progress            = sprintf('Computing cosine similarity index map for subject %d: [', unique(ProtoTable.subj_id));
 else
     progress            = sprintf('Computing cosine similarity index map for group: [');
 end

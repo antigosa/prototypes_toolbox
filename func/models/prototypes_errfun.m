@@ -6,12 +6,14 @@ function err = prototypes_errfun(modelfun, param, ProtoTable, opt_in)
 model_name = strrep(func2str(modelfun), 'prototypes_model_', '');
 
 
-opt.w           = param(1);
+% opt.w           = param(1);
+opt.w_theta         = param(1);
+opt.w_r             = param(2);
 
 if opt_in.fit_wOnly==0
     switch model_name
         case 'CAM'
-            prototypes      = param(2:end);
+            prototypes      = param(3:end);
             
         case 'LCAM'
             prototypes      = param(2:end-1);
@@ -34,24 +36,18 @@ opt.prototypes          = reshape(prototypes, [], 2);
 opt.method              = 'CategoryPrototypes';
 
 
-% Models              = ProtoTable.Properties.UserData.Models.(model_name).param;
-% Models.Prototype    = mat2cell(prototypes, ones(ncategories, 1), 2); %{prototypes};
-% Models.w            = repmat(opt.w, ncategories, 1);
-% Models.Properties.UserData.Description = 'Prototype and w updated after optimization procedure';
-% ProtoTable              = prototypes_assignPrototypes2Targets(ProtoTable, Models);
-
 ProtoTablePredicted     = modelfun(ProtoTable, opt);
 
-PredictedResponses  = ProtoTablePredicted.ResponseDots_xy;
+PredictedResponses      = ProtoTablePredicted.ResponseDots_xy;
 
-R2                  = prototypes_R2(ProtoTable, PredictedResponses, 'SST', 0); % 'SST' | 'mvarCorr'
+R2                      = prototypes_R2(ProtoTable, PredictedResponses, 'SST', 0); % 'SST' | 'mvarCorr'
 % R2 = prototypes_R2(ProtoTable, PredictedResponses, [], 'mvarCorr', 0); % 'SST' | 'mvarCorr'
 err = 1-R2;
 
 
 if isfield(opt_in, 'figure') & ~isempty(opt_in.figure) & opt_in.figure~=0
     figure(opt_in.figure);clf;    
-    axis square; axis(ProtoTable.Properties.UserData.ShapeRect([1 3 2 4]));set(gca, 'YDir', ProtoTable.Properties.UserData.YDir)
+    axis square; axis(ProtoTable.Properties.UserData.ShapeRect([1 3 2 4]));set(gca, 'YDir', ProtoTable.Properties.UserData.YDir{1})
     
     % plot actual dots
     hold on; scatter(ProtoTable.ActualDots_xy(:,1), ProtoTable.ActualDots_xy(:, 2), 'MarkerFaceColor', [0.8 0.8 0.8], 'MarkerEdgeColor', 'none');

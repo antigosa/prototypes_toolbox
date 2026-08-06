@@ -1,7 +1,7 @@
 function xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
 % function xy = prototypes_generate_grid(Shape, ShapeRect, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise, use_seed)
 
-if nargin==7
+if nargin<8
     use_seed='shuffle';
 end
 
@@ -56,6 +56,8 @@ function xy = prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_
 % prototypes_generate_grid_Circle(shape_width, shape_height, n_dots_x, n_dots_y, multOf, grid_offset, dot_noise)
 
 close all;
+
+plotGrid = 0;
 
 % be sure that the randomization is fine
 % rng('shuffle');
@@ -120,15 +122,20 @@ xy = [xy_x, xy_y];
 
 % new_xy = new_xy - grid_dim/2;
 
-figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+if plotGrid
+    figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+end
 
 n_dots = size(xy,1);
 
 
 % offset for dots
 xy=xy+random('norm', 0, dot_noise, n_dots, 2);
-hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+
+if plotGrid
+    hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+end
 
 
 % =========================================================================
@@ -143,9 +150,12 @@ y = xy(:,2);
 
 r = sqrt((x-xc-grid_offset/2).^2 + (y-yc-grid_offset/2).^2);
 xy(r>xc, :)=[];
-hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+
+if plotGrid
+    hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+end
 
 
 %%
@@ -204,6 +214,8 @@ function xy = prototypes_generate_grid_Rectangle(shape_width, shape_height, n_do
 
 close all;
 
+plotGrid = 0;
+
 % be sure that the randomization is fine
 % rng('shuffle');
 rng(use_seed); % it should be 'shuffle';
@@ -267,9 +279,10 @@ xy = [xy_x, xy_y];
 
 % new_xy = new_xy - grid_dim/2;
 
-figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
-
+if plotGrid
+    figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    rectangle('Position', [0 0 shape_width shape_height],'Curvature', 1);
+end
 n_dots = size(xy,1);
 
 
@@ -299,10 +312,12 @@ xy(excluded_points, :) =[];
 % xy(y > grid_offset, :) =[];
 
 % xy(r>xc, :)=[];
-hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
-rectangle('Position', [0 0 shape_width shape_height],'Curvature', 0);
 
+if plotGrid
+    hold on; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    figure; scatter(xy(:,1), xy(:,2), 'Filled'); axis image;
+    rectangle('Position', [0 0 shape_width shape_height],'Curvature', 0);
+end
 
 %%
 n_dots = size(xy, 1);

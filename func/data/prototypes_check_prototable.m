@@ -1,11 +1,51 @@
 function [missing_variables, missing_UDFields] = prototypes_check_prototable(ProtoTable, verbose)
 % function [missing_variables, missing_UDFields] = prototypes_check_prototable(ProtoTable, verbose)
 
+if nargin==0
+    proto_var = prototypes_variables;
+    disp(proto_var);
+    return;
+end
+
 if nargin==1; verbose=0;end
 
 missing_variables   = prototypes_check_prototable_Variables(ProtoTable, verbose);
 missing_UDFields    = prototypes_check_prototable_UserData(ProtoTable, verbose);
 prototypes_check_internal_consistency(ProtoTable, verbose);
+
+% check var type
+% Returns a logical array (1 if true, 0 if false) for each column
+isCharCol = varfun(@ischar, ProtoTable, 'OutputFormat', 'uniform');
+
+if any(isCharCol)   
+    % Extract the actual names of those variables
+    charVarNames = ProtoTable.Properties.VariableNames(isCharCol);
+    
+    % Display the names
+    disp(charVarNames);
+    
+    error('all non-numerical variables in the table should be cellstr');
+end
+
+
+fn = fieldnames(ProtoTable.Properties.UserData);
+
+isFieldChar = zeros(1, length(fn));
+for i = 1:length(fn)
+    isFieldChar(i) = ischar(ProtoTable.Properties.UserData.(fn{i}));    
+end
+
+if any(isFieldChar)   
+    % Extract the actual names of those variables
+    charVarNames = fn(isFieldChar==1);
+    
+    % Display the names
+    disp(charVarNames);
+    
+    error('all non-numerical variables in .UserData should be cellstr');
+end
+
+
 
 
 
@@ -55,23 +95,23 @@ for i = 1:length(ProtoTable.Properties.UserData)
     
     proto_var=prototypes_variables;
     
-    check_fundamental_variables = ismember(proto_var.FundamentalUD, FieldNames);
-    check_important_variables   = ismember(proto_var.ImportantUD, FieldNames);
-    check_optional_variables    = ismember(proto_var.OptionalUD, FieldNames);
+    check_fundamental_variables = ismember(proto_var.FundamentalUserData, FieldNames);
+    check_important_variables   = ismember(proto_var.ImportantUserData, FieldNames);
+    check_optional_variables    = ismember(proto_var.OptionalUserData, FieldNames);
     if any(check_fundamental_variables==0)
-        missing_fields = proto_var.FundamentalUD(~check_fundamental_variables);
+        missing_fields = proto_var.FundamentalUserData(~check_fundamental_variables);
         display(missing_fields);
         warning('missing fundamental variables: in future this will be an error');
     end
     
     if verbose
         if any(check_important_variables==0)
-            display(proto_var.ImportantUD(~check_important_variables))
+            display(proto_var.ImportantUserData(~check_important_variables))
             warning('missing important variables');
         end
         
         if any(check_optional_variables==0)
-            display(proto_var.OptionalUD(~check_optional_variables))
+            display(proto_var.OptionalUserData(~check_optional_variables))
             warning('missing optional variables');
         end
     end
@@ -108,29 +148,35 @@ if isfield(ProtoTable.Properties.UserData, 'cosine_map')
     end
     
     if ~isfield(ProtoTable.Properties.UserData.cosine_map, 'alphavalue')
-        error('You now have to have a field .UserData.cosine_map.alphavalue');        
-    end    
+        error('You now have to have a field .UserData.cosine_map.alphavalue');
+    end
     
-    
-      
 end
 
-% % check the rectangle 
+% % check the rectangle
 % assert(ProtoTable.Properties.UserData.RectWidth == (ProtoTable.Properties.UserData.Rectangle(3) - abs(ProtoTable.Properties.UserData.Rectangle(1))), ...
 %     'something is wrong with the Width component of the Rectangle information');
-% 
+%
 % assert(ProtoTable.Properties.UserData.RectHeight == (ProtoTable.Properties.UserData.Rectangle(4) - abs(ProtoTable.Properties.UserData.Rectangle(2))), ...
 %     'something is wrong with the Height component of the Rectangle information');
 
 function proto_var = prototypes_variables
 % function proto_var=prototypes_variables
 % Variables
-proto_var.FundamentalVariables      = {'ParticipantID', 'trials_id', 'ActualDots_xy', 'ResponseDots_xy'};
-proto_var.ImportantVariables        = {'Block', 'Error_xy', 'ErrorMag', 'DotID'};
+% proto_var.FundamentalVariables      = {'ParticipantID', 'trials_id', 'ActualDots_xy', 'ResponseDots_xy'};
+% proto_var.ImportantVariables        = {'Block', 'Error_xy', 'ErrorMag', 'DotID'};
+% proto_var.OptionalVariables         = {'MouseInitialLoc', 'ResponseDots_xy_relToScreen', 'ResponseDots_xy_relToShape', 'RectCoord_FIRST', 'RectCoord_SECOND'};
+%
+% % Field of .UserData
+% proto_var.FundamentalUserData       = {'ScreenRect', 'ShapeRect', 'ShapeContainerRect', 'YDir'};
+% proto_var.ImportantUserData         = {'Experiment', 'StimulusType', 'StimulusFileName', 'FolderName', 'FileName', 'ScreenDepth', 'ScreenPixelsPerInch', 'Units'};
+% proto_var.OptionalUserData          = {'CosineMap'};
+
+proto_var.FundamentalVariables      = {'subj_id', 'trial_id', 'ActualDots_xy', 'ResponseDots_xy', 'experiment', 'dot_id', 'stimulus_type', 'RectWidth', 'RectHeight'};
+proto_var.ImportantVariables        = {'block_id', 'errorXY', 'errorMag', 'age', 'gender'};
 proto_var.OptionalVariables         = {'MouseInitialLoc', 'ResponseDots_xy_relToScreen', 'ResponseDots_xy_relToShape', 'RectCoord_FIRST', 'RectCoord_SECOND'};
 
 % Field of .UserData
-proto_var.FundamentalUD             = {'ScreenRect', 'ShapeRect', 'ShapeContainerRect', 'YDir'};
-proto_var.ImportantUD               = {'Experiment', 'StimulusType', 'StimulusFileName', 'FolderName', 'FileName', 'ScreenDepth', 'ScreenPixelsPerInch', 'Units'};
-proto_var.OptionalUD                = {'CosineMap'};
-
+proto_var.FundamentalUserData       = {'ScreenRect', 'ShapeRect', 'ShapeContainerRect', 'YDir'};
+proto_var.ImportantUserData         = {'StimulusType', 'StimulusFileName', 'FolderName', 'FileName', 'ScreenDepth', 'ScreenPixelsPerInch', 'Units'};
+proto_var.OptionalUserData          = {''};

@@ -32,9 +32,11 @@ if ~isfield(opt, 'showTitle'); opt.showTitle=1;end
 
 subj_id = opt.subj_id;
 
-% n = length(unique(ProtoTable.subj_id));
+
 n = length(subj_id);
-if n==1
+if n>1
+    error('Please select one participant using the option .subj_id'); 
+else
     if strcmp(unique(ProtoTable.subj_id), 'group')
         isgroupData = 1;
     else
@@ -58,15 +60,15 @@ end
 
 if ~isempty(opt.trials)
     
-    tmp = ProtoTable(ismember(ProtoTable.trials_id, opt.trials),:);
+    tmp = ProtoTable(ismember(ProtoTable.trial_id, opt.trials),:);
     
     fprintf('Selecting trials:\n')
-    for i = 1:length(tmp.trials_id)
-        fprintf('\t%d - dot: %d\n', tmp.trials_id(i), tmp.dot_id(i) );
+    for i = 1:length(tmp.trial_id)
+        fprintf('\t%d - dot: %d\n', tmp.trial_id(i), tmp.dot_id(i) );
     end
     fprintf('\n')
-    ProtoTable = ProtoTable(ismember(ProtoTable.trials_id, opt.trials),:);
-    ProtoData = prototypes_slice(ProtoData, 'trials_id', opt.trials);
+    ProtoTable = ProtoTable(ismember(ProtoTable.trial_id, opt.trials),:);
+    ProtoData = prototypes_slice(ProtoData, 'trial_id', opt.trials);
 end
 
 if ~isempty(opt.dots)
@@ -74,7 +76,7 @@ if ~isempty(opt.dots)
     
     fprintf('Selecting dots:\n')
     for i = 1:length(tmp.dot_id)
-        fprintf('\t%d - trial: %d\n', tmp.dot_id(i), tmp.trials_id(i) );
+        fprintf('\t%d - trial: %d\n', tmp.dot_id(i), tmp.trial_id(i) );
     end
     fprintf('\n')
     ProtoTable = ProtoTable(ismember(ProtoTable.dot_id, opt.dots),:);
@@ -113,7 +115,7 @@ switch opt.whichSpace
         axis off; axis equal;
         ax          = gca;        
         
-        ax.YDir     = prototypes_get_metadata(ProtoTable, 'YDir');
+        ax.YDir     = cell2mat(prototypes_get_metadata(ProtoTable, 'YDir'));
         axis(ProtoTable.Properties.UserData.ShapeRect([1 3 2 4]))
 %         axis(ProtoTable.Properties.UserData.ShapeContainerRect([1 3 2 4]));
         
@@ -193,21 +195,21 @@ end
 if ~isempty(opt.trials_highlight) || ~isempty(opt.dots_highlight)
     
     if ~isempty(opt.trials_highlight)
-        tmp = ProtoTable(ismember(ProtoTable.trials_id, opt.trials_highlight),:);
+        tmp = ProtoTable(ismember(ProtoTable.trial_id, opt.trials_highlight),:);
         fprintf('Selecting trials:\n')
-        for i = 1:length(tmp.trials_id)
-            fprintf('\t%d - dot: %d\n', tmp.trials_id(i), tmp.dot_id(i) );
+        for i = 1:length(tmp.trial_id)
+            fprintf('\t%d - dot: %d\n', tmp.trial_id(i), tmp.dot_id(i) );
         end
         fprintf('\n')        
         
-        idx = find(ismember(ProtoTable.trials_id, opt.trials_highlight));
+        idx = find(ismember(ProtoTable.trial_id, opt.trials_highlight));
     elseif ~isempty(opt.dots_highlight)
         
         tmp = ProtoTable(ismember(ProtoTable.dot_id, opt.dots_highlight),:);
 
         fprintf('Selecting dots:\n')
         for i = 1:length(tmp.dot_id)
-            fprintf('\t%d - trial: %d\n', tmp.dot_id(i), tmp.trials_id(i) );
+            fprintf('\t%d - trial: %d\n', tmp.dot_id(i), tmp.trial_id(i) );
         end
         fprintf('\n')        
         idx = find(ismember(ProtoTable.dot_id, opt.dots_highlight));
@@ -224,7 +226,7 @@ if opt.showErrors
     idx             = 1:size(errorVector, 1);
     if ~isempty(opt.trials_highlight) || ~isempty(opt.dots_highlight)
         if ~isempty(opt.trials_highlight)
-            idx = find(ismember(ProtoTable.trials_id, opt.trials_highlight));
+            idx = find(ismember(ProtoTable.trial_id, opt.trials_highlight));
         elseif ~isempty(opt.dots_highlight)
             idx = find(ismember(ProtoTable.dot_id, opt.dots_highlight));
         end

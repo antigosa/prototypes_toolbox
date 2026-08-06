@@ -55,4 +55,7 @@ for i = 1:length(fn)
     end
 end
 
+if length(csimap.Properties.UserData)==1
+    idx=1;
+end
 tmp.Properties.UserData = csimap.Properties.UserData(idx);
