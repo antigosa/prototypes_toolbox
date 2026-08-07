@@ -1,26 +1,40 @@
-function ProtoData = prototypes_slice(ProtoData, varname, varvals, opt)
-% function ProtoData = prototypes_slice(ProtoData, varname, varvals, opt)
+function Data = prototypes_slice(Data, varname, varvals, opt)
+% function Data = prototypes_slice(Data, varname, varvals, opt)
 
 if nargin<4;opt=[];end
 
-if ~isfield(opt, 'sliceCSImaps'); opt.sliceCSImaps=1;end
+data_type = prototypes_datatype(Data);
 
 if iscell(varname);varname=varname{1};end
 
-idx = ismember(ProtoData.Trials.(varname), varvals);
-Trials  = ProtoData.Trials(idx, :);
-
-if ~isempty(ProtoData.csimaps) && opt.sliceCSImaps
-    % only subjects can be sliced for csimaps, otherwise, they need to be
-    % recomputed (e.g., if trials are sliced)
-    csimaps = prototypes_slice_csimap(ProtoData.csimaps, varname, varvals);
+switch data_type
+    case 'ProtoData'
+                
+        if ~isfield(opt, 'sliceCSImaps'); opt.sliceCSImaps=1;end
         
-else
-    csimaps=[];
+        
+        idx = ismember(Data.Trials.(varname), varvals);
+        Trials  = Data.Trials(idx, :);
+        
+        if ~isempty(Data.csimaps) && opt.sliceCSImaps
+            % only subjects can be sliced for csimaps, otherwise, they need to be
+            % recomputed (e.g., if trials are sliced)
+            csimaps = prototypes_slice_csimap(Data.csimaps, varname, varvals);
+            
+        else
+            csimaps=[];
+        end
+        
+        Data                = prototypes_ProtoStructure(Trials, csimaps, struct('computeSummary', 0));
+        
+    case 'Trials'
+        idx         = ismember(Data.(varname), varvals);
+        Data        = Data(idx, :);        
+        
+    case 'csimaps'
+        Data        = prototypes_slice_csimap(Data, varname, varvals);
+        
 end
-
-ProtoData                = prototypes_ProtoStructure(Trials, csimaps, struct('computeSummary', 0));
-
 
 
 

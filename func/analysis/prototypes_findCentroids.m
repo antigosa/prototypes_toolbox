@@ -1,4 +1,5 @@
 function [centroids, x_small_circle, y_small_circle] = prototypes_findCentroids(radius, center, subregions_radius, plotImage)
+% function [centroids, x_small_circle, y_small_circle] = prototypes_findCentroids(radius, center, subregions_radius, plotImage)
 
 if nargin==0
     

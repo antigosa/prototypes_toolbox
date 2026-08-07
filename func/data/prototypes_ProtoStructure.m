@@ -40,9 +40,15 @@ if ismember('gender', ProtoData.Trials.Properties.VariableNames)
 end
 
 if opt.computeSummary
-    [T_summary, T_demo, T_nTrialsXpart]         = prototypes_summary(ProtoData.Trials, struct('verbose', 0));
     
-    ProtoData.info_subjects.subject_summary     = T_summary;
-    ProtoData.info_subjects.subject_demo        = T_demo;
-    ProtoData.info_subjects.nTrialsXpart        = T_nTrialsXpart;
+    try
+        [T_summary, T_demo, T_nTrialsXpart]         = prototypes_summary(ProtoData.Trials, struct('verbose', 0));
+
+        ProtoData.info_subjects.subject_summary     = T_summary;
+        ProtoData.info_subjects.subject_demo        = T_demo;
+        ProtoData.info_subjects.nTrialsXpart        = T_nTrialsXpart;
+    catch ME
+        warning('Cannot do summary, I will skip it');
+    end
+        
 end

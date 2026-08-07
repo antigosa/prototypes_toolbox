@@ -28,6 +28,9 @@ TrialsStat.experiment(:)    = ProtoData.experiment;
 TrialsStat.stimulus_type(:) = unique(Trials.stimulus_type);
 TrialsStat(:, {'break_id', 'block_id', 'Rectcoord_FIRST', 'Rectcoord_SECOND'})=[];
 TrialsStat.trials_id(:) = 1:size(TrialsStat, 1);
+TrialsStat.Properties.RowNames(:)=[];
+
+% TrialsStat.Properties.UserData Trials.Properties.UserData
 
 opt = [];
 opt.computeSummary=0;
@@ -92,6 +95,12 @@ newVariableNames = strrep(TrialsStat.Properties.VariableNames, 'nanmean_', '');
 
 TrialsStat.Properties.VariableNames = newVariableNames;
 TrialsStat.Properties.UserData      = Trials.Properties.UserData;
+
+TrialsStat.Properties.UserData = rmfield(TrialsStat.Properties.UserData, 'folder_output');
+TrialsStat.Properties.UserData = rmfield(TrialsStat.Properties.UserData, 'fname_output');
+TrialsStat.Properties.UserData = rmfield(TrialsStat.Properties.UserData, 'experiment_dur_sec');
+TrialsStat.Properties.UserData = rmfield(TrialsStat.Properties.UserData, 'day');
+TrialsStat.Properties.UserData = rmfield(TrialsStat.Properties.UserData, 'expEnded');
 
 TrialsStat.subj_id = [];
 

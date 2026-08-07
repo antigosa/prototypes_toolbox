@@ -21,7 +21,14 @@ function ProtoTable = prototypes_model_CAM(ProtoTable, opt)
 
 if nargin<2; opt=[];end
 
-if ~isfield(opt, 'stdTRB'); opt.stdTRB=0.1;end
+if ~isfield(opt, 'sigmaM_theta'); opt.sigmaM_theta=0.1;end
+if ~isfield(opt, 'sigmaP_theta'); opt.sigmaP_theta=0.1;end
+
+if ~isfield(opt, 'sigmaM_edge'); opt.sigmaM_edge=0.1;end
+if ~isfield(opt, 'sigmaM_center'); opt.sigmaM_center=0.1;end
+if ~isfield(opt, 'sigmaP_r'); opt.sigmaP_r=0.1;end
+
+
 if ~isfield(opt, 'stdNoise'); opt.stdNoise=0;end
 if ~isfield(opt, 'method'); opt.method = 'CategoryPrototypes';end
 if ~isfield(opt, 'w'); opt.w = 0.75;end
@@ -31,33 +38,32 @@ if ~isfield(opt, 'truncation'); opt.truncation = 1;end
 if ~isfield(opt, 'categories'); opt.categories = {'bottom_left', 'top_left', 'bottom_right', 'top_right'};end
 
 % get the options
-w           = opt.w;
-w_theta     = opt.w_theta;
-w_r         = opt.w_r;
-prototypes  = opt.prototypes;
-categories  = opt.categories;
-method      = opt.method;
-stdTRB      = opt.stdTRB;
-stdNoise    = opt.stdNoise;
+w               = opt.w;
+prototypes      = opt.prototypes;
+categories      = opt.categories;
+method          = opt.method;
+
+sigmaM_theta    = opt.sigmaM_theta;             % Uncertainty in angular memory
+sigmaP_theta    = opt.sigmaP_theta;             % Uncertainty in angular prototype
+
+sigmaM_edge     = opt.sigmaM_edge;              % Uncertainty at the circumference (r=1)
+sigmaM_center   = opt.sigmaM_center;            % Uncertainty at the center (r=0)
+sigmaP_r        = opt.sigmaP_r;                 % Uncertainty of the radial prototype
+
+
+stdNoise        = opt.stdNoise;
 % Assign a prototype to each point. I am using two ways for now: 1) the
 % prototype of a dot depends on the subquadrant (data must be NORMALIZED
 % for this); 2) the data are assigned to the related centroid estimated
 % using KMEANS
 ProtoTable      = helper_assignPrototypes2Targets(ProtoTable, prototypes, categories, method);
 
-% STILL NOT WORKING
-
 if opt.truncation
-%     w_theta         = w;
-%     w_r             = w;
-    sigmaM_theta    = stdTRB; % stdTRB: 0-1
-    sigmaM_r        = stdTRB; % stdTRB: 0-1
-    ProtoTable  = helper_compute_trucation_bias(ProtoTable, w_theta, sigmaM_theta, w_r, sigmaM_r);
-    Responses   = ProtoTable.ResponseDots_xy;
-%     Responses   = w.*ProtoTable.ResponseDots_xy + (1-w).*ProtoTable.prototypeXY;
+    ProtoTable      = helper_compute_trucation_bias(ProtoTable, sigmaM_theta, sigmaP_theta, sigmaM_edge, sigmaM_center, sigmaP_r);
+    Responses       = ProtoTable.ResponseDots_xy;
     
 else    
-    Responses = w.*ProtoTable.ActualDots_xy + (1-w).*ProtoTable.prototypeXY;
+    Responses       = w.*ProtoTable.ActualDots_xy + (1-w).*ProtoTable.prototypeXY;
 end
 
 if stdNoise
@@ -106,8 +112,7 @@ if strcmp(method, 'KmeansPrototypes')
     end
 end
 
-
-function ProtoTable = helper_compute_trucation_bias(ProtoTable, w_theta, sigmaM_theta, w_r, sigmaM_r)
+function ProtoTable = helper_compute_trucation_bias(ProtoTable, sigmaM_theta, sigmaP_theta, sigmaM_edge, sigmaM_center, sigmaP_r)
 
 % stdTRB              = stdTRB/ProtoTable.Properties.UserData.ShapeRect(3);
 ProtoTable          = prototypes_normalize_data(ProtoTable, struct('centreOnly', 1));
@@ -117,8 +122,8 @@ figure_size         = ProtoTable.Properties.UserData.ShapeRect;
 horz_border         = mean(figure_size([1 3]));
 vert_border         = mean(figure_size([2 4]));
 
-sigmaM_theta        = 90*sigmaM_theta;
-sigmaM_r            = 2*figure_size(3)*sigmaM_r;
+% sigmaM_theta        = 90*sigmaM_theta;
+% sigmaM_r            = 2*figure_size(3)*sigmaM_r;
 
 T                   = ProtoTable.ActualDots_xy;
 % num_trials          = size(T, 1);
@@ -172,7 +177,7 @@ for i = 1:length(category_id)
     [p_theta, p_r]                      = cart2pol(prototypeXY(1), prototypeXY(2));
     p_theta                             = rad2deg(p_theta);
     p_theta                             = mod(p_theta, 360);
-    [R_x, R_y]                          = CAM_polar(mu_x, mu_y, w_theta, sigmaM_theta, p_theta, theta_min, theta_max, w_r, sigmaM_r, p_r, a_r, b_r);
+    [R_x, R_y]                          = CAM_polar(mu_x, mu_y, sigmaM_theta, sigmaP_theta, p_theta, theta_min, theta_max, sigmaM_edge, sigmaM_center, sigmaP_r, p_r, a_r, b_r);
     ProtoTable.ResponseDots_xy(idx, :)  = [R_x, R_y];
     
     

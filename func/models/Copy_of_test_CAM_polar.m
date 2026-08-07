@@ -1,11 +1,8 @@
 close all;
 
-
-figure_size = 100;
-
 % --- Angular Model Parameters ---
-sigmaM_theta    = 0.05*figure_size;           % Uncertainty in angular memory
-sigmaP_theta    = 0.05*figure_size;           % Uncertainty in angular prototype
+w_theta         = 1;          % Weight for angular memory
+sigmaM_theta    = 3;           % Uncertainty in angular memory
 
 
 category='bottom_right';
@@ -34,11 +31,12 @@ switch category
 end
 
 % --- Radial Model Parameters ---
-% sigmaM_r        = 0.13*figure_size;     % Uncertainty in radial memory
-sigmaM_edge     = 0.05*figure_size;     % Uncertainty at the circumference (r=1)
-sigmaM_center   = 0.2*figure_size;      % Uncertainty at the center (r=0)
-sigmaP_r        = 0.10*figure_size;     % Uncertainty of the radial prototype
-p_r             = 0.5*figure_size;      % Radial prototype
+
+figure_size = 100;
+
+w_r             = 1;                    % Weight for radial memory [12]
+sigmaM_r        = 0.13*figure_size;     % Uncertainty in radial memory [12]
+p_r             = 0.5*figure_size;      % Radial prototype [5]
 a_r             = 0;                    % Circle center boundary
 b_r             = 1*figure_size;        % Circumference boundary
 actual_r        = 0.5*figure_size;
@@ -63,7 +61,7 @@ ax=gca;ax.RLim=[0 1].*figure_size;
 %     [R_x(i), R_y(i)] = CAM_polar(mu_x(i), mu_y(i), lambda_theta, sigmaM_theta, p_theta, a_theta, b_theta, lambda_r, sigmaM_r, p_r, a_r, b_r);
 % end
 
-[R_x, R_y] = CAM_polar(mu_x, mu_y, sigmaM_theta, sigmaP_theta, p_theta, a_theta, b_theta, sigmaM_edge, sigmaM_center, sigmaP_r, p_r, a_r, b_r);
+[R_x, R_y] = CAM_polar(mu_x, mu_y, w_theta, sigmaM_theta, p_theta, a_theta, b_theta, w_r, sigmaM_r, p_r, a_r, b_r);
 
 [R_theta, R_radius] = cart2pol(R_x, R_y);
 polarscatter(R_theta, R_radius, 'r');

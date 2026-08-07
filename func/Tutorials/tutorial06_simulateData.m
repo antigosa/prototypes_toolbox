@@ -43,26 +43,14 @@ figure; prototypes_plot_dots(ProtoData, 'both', opt);
 %% test fit_model (CAM_noBoundaries)
 
 figure_size = ProtoData.Trials.Properties.UserData.ShapeRect([3 4]); 
-% Param0 = table;
-% Param0.CategoryID   = [1 1 1 1]';
-% Param0.Name         = {'TopRight', 'TopLeft', 'BottomLeft', 'BottomRight'}';
-% Param0.Prototype    = {[0.75 0.25].*figure_size, [0.25 0.25].*figure_size, [0.25 0.75].*figure_size, [0.75 0.75].*figure_size}';
-% Param0.w            = ([0.5 0.5 0.5 0.5])';
-% Param0.Boundaries   = {[0.5 Inf; -Inf 0.5].*figure_size, [-Inf 0.5; -Inf 0.5].*figure_size, [-Inf 0.5; 0.5 Inf].*figure_size, [0.5 Inf; 0.5 Inf].*figure_size}';
-% Param0.Properties.UserData.HyperparamNames  = {'Boundaries'};
-% Param0.Properties.UserData.Description      = 'Initial parameters';
-% Param0.Properties.UserData.nPrototypes      = length(Param0.Prototype);
-
-
 param0                  = [];
-param0.w                = [0.5 0.5 0.5 0.5]; % they can be fit separately
+param0.w_theta          = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
+param0.w_r              = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
 param0.prototypesXY     = [0.75 0.25; 0.25 0.25; 0.25 0.75; 0.75 0.75].*figure_size;
-% param0.category_name    = {'TopRight', 'TopLeft', 'BottomLeft', 'BottomRight'}';
-% param0.category_id      = [1 2 3 4]';
-% param0.boundary         = {[0.5 Inf; -Inf 0.5].*figure_size, [-Inf 0.5; -Inf 0.5].*figure_size, [-Inf 0.5; 0.5 Inf].*figure_size, [0.5 Inf; 0.5 Inf].*figure_size}';
-param0.paramNames       = {'w', 'prototypes'};
+param0.paramNames       = {'w_theta', 'w_r', 'prototypes_br', 'prototypes_bl', 'prototypes_tl', 'prototypes_tr'};
 param0.nParam           = length(param0.paramNames); % is it really two?
-param0.model            = 'CAM_noBoundaries';
+param0.model            = 'CAM';
+
 
 % =====================================================================
 % Prepare the options for the fitting function
@@ -71,29 +59,19 @@ opt_fit                 = [];
 opt_fit.DisplayIter     = 'Off'; % 'Off' | 'iter'
 opt_fit.DisplayParam    = 0;
 opt_fit.figure          = []; % [] | 1
-
-
-% Param0.Properties.UserData.ParamNames       = {'w', 'Prototype'};
-% Param0.Properties.UserData.NParam           = length(Param0.Properties.UserData.ParamNames)+1;
-% Param0.Properties.UserData.ModelName        = 'CAM_noBoundaries';
-% opt_fit.Param0          = Param0;
-
-% ProtoTable = prototypes_assignPrototypes2Targets(ProtoTable, param0);
-
+opt_fit.truncation      = 0;
 
 
 param = prototypes_fit_model(ProtoTable, @prototypes_model_CAM, param0, opt_fit);
 
 %% Simulate a circle with truncation bias
-opt             = [];
-opt.ShapeDim    = [200 200];
-opt.stdTRB      = 0.1;
-% opt.w           = 1;
-opt.w_theta     = 0.8;
-opt.w_r         = 0.8;
-opt.stdNoise    = 5;
-ProtoTable      = prototypes_synthetic_DS('Circle', opt);
-ProtoTable      = prototypes_compute_errorVectors(ProtoTable);
+opt                 = [];
+opt.ShapeDim        = [200 200];
+opt.sigmaM_r        = 0.1;
+opt.sigmaM_theta    = 0.1;
+opt.stdNoise        = 5;
+ProtoTable          = prototypes_synthetic_DS('Circle', opt);
+ProtoTable          = prototypes_compute_errorVectors(ProtoTable);
 % ProtoTable = prototypes_normalize_data(ProtoTable);
 
 prototypes_check_prototable(ProtoTable, 1);
@@ -115,18 +93,17 @@ figure; prototypes_plot_dots(ProtoData, 'both', opt);
 % figure; prototypes_plot_cosineMap(ProtoData, 'W_SimixSubject', opt);
 
 
-%% test fit_model (CAM_noBoundaries)
+%% test fit_model (6 parameters: w_theta, w_r, 4 prototypes)
 
 figure_size = ProtoData.Trials.Properties.UserData.ShapeRect([3 4]); 
 
 param0                  = [];
-% param0.w                = [0.5 0.5 0.5 0.5]; % they can be fit separately
-param0.w_theta          = [0.5 0.5 0.5 0.5]; % they can be fit separately
-param0.w_r              = [0.5 0.5 0.5 0.5]; % they can be fit separately
+param0.sigmaM_theta     = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
+param0.sigmaM_r         = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
 param0.prototypesXY     = [0.75 0.25; 0.25 0.25; 0.25 0.75; 0.75 0.75].*figure_size;
-param0.paramNames       = {'w_theta', 'w_r', 'prototypes'};
+param0.paramNames       = {'w_theta', 'w_r', 'prototypes_br', 'prototypes_bl', 'prototypes_tl', 'prototypes_tr'};
 param0.nParam           = length(param0.paramNames); % is it really two?
-param0.model            = 'CAM_noBoundaries';
+param0.model            = 'CAM';
 
 % =====================================================================
 % Prepare the options for the fitting function
@@ -137,23 +114,64 @@ opt_fit.DisplayParam    = 0;
 opt_fit.figure          = []; % [] | 1
 
 
-param = prototypes_fit_model(ProtoTable, @prototypes_model_CAM, param0, opt_fit);
+param                   = prototypes_fit_model(ProtoTable, @prototypes_model_CAM, param0, opt_fit);
 
-ProtoData       = prototypes_ProtoStructure(ProtoTable);
+ProtoData               = prototypes_ProtoStructure(ProtoTable);
 
-ProtoTable_sim = ProtoTable;
-opt             = [];
-opt.prototypes  = param.prototypesXY;
-opt.w_theta     = param.w_theta;
-opt.w_r         = param.w_r;
-ProtoTable_sim  = prototypes_model_CAM(ProtoTable_sim, opt);
-ProtoData_sim   = prototypes_ProtoStructure(ProtoTable_sim);
+ProtoTable_sim          = ProtoTable;
+opt                     = [];
+opt.prototypes          = param.prototypesXY;
+opt.w_theta             = param.w_theta;
+opt.w_r                 = param.w_r;
+ProtoTable_sim          = prototypes_model_CAM(ProtoTable_sim, opt);
+ProtoData_sim           = prototypes_ProtoStructure(ProtoTable_sim);
 
-opt = [];
-opt.subj_id = 1;
+opt                     = [];
+opt.subj_id             = 1;
 figure; 
 tiledlayout(1, 2);
 nexttile; prototypes_plot_dots(ProtoData, 'both', opt);
 nexttile; prototypes_plot_dots(ProtoData_sim, 'both', opt);
 
 hold on; plot(param.prototypesXY(:, 1), param.prototypesXY(:, 2), 'o', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'k');
+
+%% test fit_model (2 parameters: w_theta, w_r)
+
+figure_size = ProtoData.Trials.Properties.UserData.ShapeRect([3 4]); 
+
+param0                  = [];
+param0.w_theta          = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
+param0.w_r              = [0.5 0.5 0.5 0.5]; % not sure I need to have 4 elements here
+param0.paramNames       = {'w_theta', 'w_r'};
+param0.nParam           = length(param0.paramNames); % is it really two?
+param0.model            = 'CAM';
+
+% =====================================================================
+% Prepare the options for the fitting function
+% =====================================================================
+opt_fit                 = [];
+opt_fit.DisplayIter     = 'iter'; % 'Off' | 'iter'
+opt_fit.DisplayParam    = 0;
+opt_fit.figure          = 1; % [] | 1
+opt_fit.prototypesXY    = [0.75 0.25; 0.25 0.25; 0.25 0.75; 0.75 0.75].*figure_size;
+
+param                   = prototypes_fit_model(ProtoTable, @prototypes_model_CAM, param0, opt_fit);
+
+ProtoData               = prototypes_ProtoStructure(ProtoTable);
+
+ProtoTable_sim          = ProtoTable;
+opt                     = [];
+opt.prototypes          = opt_fit.prototypesXY;
+opt.w_theta             = param.w_theta;
+opt.w_r                 = param.w_r;
+ProtoTable_sim          = prototypes_model_CAM(ProtoTable_sim, opt);
+ProtoData_sim           = prototypes_ProtoStructure(ProtoTable_sim);
+
+opt                     = [];
+opt.subj_id             = 1;
+figure; 
+tiledlayout(1, 2);
+nexttile; prototypes_plot_dots(ProtoData, 'both', opt);
+nexttile; prototypes_plot_dots(ProtoData_sim, 'both', opt);
+
+hold on; plot(opt_fit.prototypesXY(:, 1), opt_fit.prototypesXY(:, 2), 'o', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'k');

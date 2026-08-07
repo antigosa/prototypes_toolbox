@@ -5,6 +5,8 @@ function err = prototypes_errfun(modelfun, param, ProtoTable, opt_in)
 
 model_name = strrep(func2str(modelfun), 'prototypes_model_', '');
 
+if ~isfield(opt_in, 'method'); opt_in.method='SST';end
+if ~isfield(opt_in, 'truncation'); opt_in.truncation = 1;end
 
 % opt.w           = param(1);
 opt.w_theta         = param(1);
@@ -19,10 +21,13 @@ if opt_in.fit_wOnly==0
             prototypes      = param(2:end-1);
             opt.stdL        = param(end);
     end
+    
+    prototypes          = reshape(prototypes, [], 2);
+    
 elseif opt_in.fit_wOnly==1
     switch model_name
         case 'CAM'
-            prototypes      = reshape(vertcat(opt_in.Param0.Prototype{:}), 1, []);
+            prototypes      = opt_in.prototypesXY;
             
         case 'LCAM'
             prototypes      = reshape(vertcat(opt_in.Param0.Prototype{:}), 1, []);
@@ -32,17 +37,17 @@ elseif opt_in.fit_wOnly==1
 end
         
 
-opt.prototypes          = reshape(prototypes, [], 2);
+opt.prototypes          = prototypes;
 opt.method              = 'CategoryPrototypes';
 
-
+opt.truncation          = opt_in.truncation;
 ProtoTablePredicted     = modelfun(ProtoTable, opt);
 
 PredictedResponses      = ProtoTablePredicted.ResponseDots_xy;
 
-R2                      = prototypes_R2(ProtoTable, PredictedResponses, 'SST', 0); % 'SST' | 'mvarCorr'
-% R2 = prototypes_R2(ProtoTable, PredictedResponses, [], 'mvarCorr', 0); % 'SST' | 'mvarCorr'
-err = 1-R2;
+R2                      = prototypes_R2(ProtoTable, PredictedResponses, opt_in.method, 0); % 'SST' | 'mvarCorr'
+
+err                     = 1-R2;
 
 
 if isfield(opt_in, 'figure') & ~isempty(opt_in.figure) & opt_in.figure~=0
